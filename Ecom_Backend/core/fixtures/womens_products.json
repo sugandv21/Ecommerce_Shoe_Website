@@ -1,0 +1,303 @@
+[
+  {
+    "model": "core.brand",
+    "pk": 1,
+    "fields": { "name": "Lunar", "slug": "lunar" }
+  },
+  {
+    "model": "core.brand",
+    "pk": 2,
+    "fields": { "name": "Lilley", "slug": "lilley" }
+  },
+  {
+    "model": "core.brand",
+    "pk": 3,
+    "fields": { "name": "Softlites", "slug": "softlites" }
+  },
+  {
+    "model": "core.brand",
+    "pk": 4,
+    "fields": { "name": "shoezone", "slug": "shoezone" }
+  },
+  {
+    "model": "core.brand",
+    "pk": 5,
+    "fields": { "name": "Truffle", "slug": "truffle" }
+  },
+  {
+    "model": "core.brand",
+    "pk": 6,
+    "fields": { "name": "Beckett", "slug": "beckett" }
+  },
+
+  { "model": "core.color", "pk": 1, "fields": { "name": "Black", "hex": "#000000" } },
+  { "model": "core.color", "pk": 2, "fields": { "name": "White", "hex": "#ffffff" } },
+  { "model": "core.color", "pk": 3, "fields": { "name": "Brown", "hex": "#7b4f4f" } },
+  { "model": "core.color", "pk": 4, "fields": { "name": "Blue", "hex": "#1790ff" } },
+  { "model": "core.color", "pk": 5, "fields": { "name": "Green", "hex": "#2ecc71" } },
+  { "model": "core.color", "pk": 6, "fields": { "name": "Red", "hex": "#ff4d4d" } },
+  { "model": "core.color", "pk": 7, "fields": { "name": "Grey", "hex": "#bdbdbd" } },
+  { "model": "core.color", "pk": 8, "fields": { "name": "Lilac", "hex": "#deb7c8" } },
+
+  { "model": "core.size", "pk": 1, "fields": { "label": "Junior UK(3)" } },
+  { "model": "core.size", "pk": 2, "fields": { "label": "UK(4)" } },
+  { "model": "core.size", "pk": 3, "fields": { "label": "UK(5)" } },
+  { "model": "core.size", "pk": 4, "fields": { "label": "UK(6)" } },
+  { "model": "core.size", "pk": 5, "fields": { "label": "UK(7)" } },
+  { "model": "core.size", "pk": 6, "fields": { "label": "Adult" } },
+  { "model": "core.size", "pk": 7, "fields": { "label": "One Size" } },
+
+  {
+    "model": "core.product",
+    "pk": 1,
+    "fields": {
+      "title": "Lunar",
+      "subtitle": "Tancy Womens Lilac Sandal",
+      "slug": "lunar-tancy-lilac-sandal",
+      "price": "2799.00",
+      "mrp": "2799.00",
+      "description": "Comfortable lilac sandal with cushioned sole and beaded detail.",
+      "category": "womens",
+      "style": "Sandals",
+      "brand": 1,
+      "sizes": [2,3,4],
+      "colors": [8,1,3],
+      "rating": 5.0,
+      "is_active": true,
+      "created": "2025-09-16T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 2,
+    "fields": {
+      "title": "Lilley",
+      "subtitle": "Drew Womens Diamante Slip Shoe",
+      "slug": "lilley-drew-diamante-slip",
+      "price": "3799.00",
+      "mrp": "3799.00",
+      "description": "Elegant slip-on with diamante detailing.",
+      "category": "womens",
+      "style": "Trainers",
+      "brand": 2,
+      "sizes": [3,4,5],
+      "colors": [2,1],
+      "rating": 4.8,
+      "is_active": true,
+      "created": "2025-09-16T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 3,
+    "fields": {
+      "title": "Softlites",
+      "subtitle": "Selina Womens Navy Sandal",
+      "slug": "softlites-selina-navy-sandal",
+      "price": "2699.00",
+      "mrp": "2699.00",
+      "description": "Soft strap sandal perfect for daily wear.",
+      "category": "womens",
+      "style": "Sandals",
+      "brand": 3,
+      "sizes": [2,3,4],
+      "colors": [4,1,7],
+      "rating": 4.0,
+      "is_active": true,
+      "created": "2025-09-16T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 4,
+    "fields": {
+      "title": "shoezone",
+      "subtitle": "Sadie Womens Floral Beach Mule",
+      "slug": "shoezone-sadie-floral-mule",
+      "price": "2799.00",
+      "mrp": "2799.00",
+      "description": "Floral beach mule, casual and lightweight.",
+      "category": "womens",
+      "style": "Mules",
+      "brand": 4,
+      "sizes": [2,3,7],
+      "colors": [4,5,2],
+      "rating": 4.6,
+      "is_active": true,
+      "created": "2025-09-16T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 5,
+    "fields": {
+      "title": "Truffle",
+      "subtitle": "Ophelia Womens Silver Heel",
+      "slug": "truffle-ophelia-silver-heel",
+      "price": "5699.00",
+      "mrp": "5699.00",
+      "description": "Silver heels for special evenings.",
+      "category": "womens",
+      "style": "Heels",
+      "brand": 5,
+      "sizes": [3,4,5,6],
+      "colors": [2,7],
+      "rating": 4.5,
+      "is_active": true,
+      "created": "2025-09-16T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 6,
+    "fields": {
+      "title": "Noelle mesh Bow Ballerinas",
+      "subtitle": "Comfort mesh ballerina",
+      "slug": "noelle-mesh-ballerinas",
+      "price": "3599.00",
+      "mrp": "3599.00",
+      "description": "Lightweight ballerina with bow accent.",
+      "category": "womens",
+      "style": "Ballerinas",
+      "brand": 2,
+      "sizes": [3,4,5],
+      "colors": [3,2],
+      "rating": 4.3,
+      "is_active": true,
+      "created": "2025-09-16T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 7,
+    "fields": {
+      "title": "Stella flat Embellished Sliders",
+      "subtitle": "Embellished sliders",
+      "slug": "stella-flat-embellished-sliders",
+      "price": "1999.00",
+      "mrp": "1999.00",
+      "description": "Casual sliders with subtle embellishments.",
+      "category": "womens",
+      "style": "Sliders",
+      "brand": 4,
+      "sizes": [2,3,4,5],
+      "colors": [1,7,3],
+      "rating": 4.2,
+      "is_active": true,
+      "created": "2025-09-16T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 8,
+    "fields": {
+      "title": "Olivia Pencil Heels",
+      "subtitle": "Classic black heels",
+      "slug": "olivia-pencil-heels",
+      "price": "3199.00",
+      "mrp": "3199.00",
+      "description": "Sleek pencil heels for office and parties.",
+      "category": "womens",
+      "style": "Heels",
+      "brand": 6,
+      "sizes": [3,4,5,6],
+      "colors": [1],
+      "rating": 4.7,
+      "is_active": true,
+      "created": "2025-09-16T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 9,
+    "fields": {
+      "title": "Amelia Kitten Heels",
+      "subtitle": "Comfort kitten heels",
+      "slug": "amelia-kitten-heels",
+      "price": "2199.00",
+      "mrp": "2199.00",
+      "description": "Low kitten heels for everyday elegance.",
+      "category": "womens",
+      "style": "Heels",
+      "brand": 2,
+      "sizes": [3,4,5],
+      "colors": [2,7],
+      "rating": 4.4,
+      "is_active": true,
+      "created": "2025-09-16T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 10,
+    "fields": {
+      "title": "Beckett Sandals",
+      "subtitle": "Casual summer sandals",
+      "slug": "beckett-sandals",
+      "price": "2599.00",
+      "mrp": "2599.00",
+      "description": "Breathable everyday sandals.",
+      "category": "womens",
+      "style": "Sandals",
+      "brand": 6,
+      "sizes": [2,3,4,5],
+      "colors": [1,5],
+      "rating": 4.6,
+      "is_active": true,
+      "created": "2025-09-16T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 11,
+    "fields": {
+      "title": "Gitano Flat back Elastic Sandals",
+      "subtitle": "Comfort flat sandals",
+      "slug": "gitano-flat-elastic-sandals",
+      "price": "1799.00",
+      "mrp": "1799.00",
+      "description": "Simple elastic-backed flat sandal.",
+      "category": "womens",
+      "style": "Sandals",
+      "brand": 4,
+      "sizes": [2,3,4],
+      "colors": [1,2],
+      "rating": 4.1,
+      "is_active": true,
+      "created": "2025-09-16T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 12,
+    "fields": {
+      "title": "Tancy Womens Lilac Sandal (Alt)",
+      "subtitle": "Alternate image entry",
+      "slug": "tancy-lilac-alt",
+      "price": "2799.00",
+      "mrp": "2799.00",
+      "description": "Alternate listing for Tancy sandal.",
+      "category": "womens",
+      "style": "Sandals",
+      "brand": 1,
+      "sizes": [2,3],
+      "colors": [8,1],
+      "rating": 4.9,
+      "is_active": true,
+      "created": "2025-09-16T00:00:00Z"
+    }
+  },
+
+  { "model": "core.productimage", "pk": 1, "fields": { "product": 1, "image": "products/lunar.jpg", "alt_text": "Lunar lilac sandal", "order": 0 } },
+  { "model": "core.productimage", "pk": 2, "fields": { "product": 2, "image": "products/lilley.jpg", "alt_text": "Lilley diamante slip", "order": 0 } },
+  { "model": "core.productimage", "pk": 3, "fields": { "product": 3, "image": "products/softlites.jpg", "alt_text": "Softlites navy sandal", "order": 0 } },
+  { "model": "core.productimage", "pk": 4, "fields": { "product": 4, "image": "products/shoezone.jpg", "alt_text": "shoezone floral mule", "order": 0 } },
+  { "model": "core.productimage", "pk": 5, "fields": { "product": 5, "image": "products/truffle.jpg", "alt_text": "Truffle silver heel", "order": 0 } },
+  { "model": "core.productimage", "pk": 6, "fields": { "product": 6, "image": "products/noelle.jpg", "alt_text": "Noelle mesh ballerina", "order": 0 } },
+  { "model": "core.productimage", "pk": 7, "fields": { "product": 7, "image": "products/stella.jpg", "alt_text": "Stella sliders", "order": 0 } },
+  { "model": "core.productimage", "pk": 8, "fields": { "product": 8, "image": "products/olivia.jpg", "alt_text": "Olivia pencil heels", "order": 0 } },
+  { "model": "core.productimage", "pk": 9, "fields": { "product": 9, "image": "products/amelia.jpg", "alt_text": "Amelia kitten heels", "order": 0 } },
+  { "model": "core.productimage", "pk": 10, "fields": { "product": 10, "image": "products/beckett.jpg", "alt_text": "Beckett sandals", "order": 0 } },
+  { "model": "core.productimage", "pk": 11, "fields": { "product": 11, "image": "products/gitano.jpg", "alt_text": "Gitano flat sandals", "order": 0 } },
+  { "model": "core.productimage", "pk": 12, "fields": { "product": 12, "image": "products/lunar_alt.jpg", "alt_text": "Lunar alt", "order": 0 } }
+]
