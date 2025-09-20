@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const API_ROOT = (import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api").replace(/\/+$/, "");
+const API_ROOT = (import.meta.env.VITE_API_URL || "https://django-4hm5.onrender.com/api").replace(/\/+$/, "");
 axios.defaults.withCredentials = true; 
 
 import placedIcon from "../assets/images/cart.png";
@@ -305,3 +305,4 @@ export default function TrackingPage() {
     </div>
   );
 }
+
