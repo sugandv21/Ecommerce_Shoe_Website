@@ -5,7 +5,7 @@ import ProductCard from "../components/ProductCard";
 import cartService from "../api/cartService";
 
 const API_ROOT =
-  typeof import.meta !== "undefined" ? import.meta.env.VITE_API_URL || "" : "";
+  typeof import.meta !== "undefined" ? import.meta.env.VITE_API_URL || "https://django-4hm5.onrender.com/api" : "";
 
 export default function WomensPage() {
   const PAGE_SIZE = 12;
@@ -446,3 +446,4 @@ export default function WomensPage() {
     </div>
   );
 }
+
