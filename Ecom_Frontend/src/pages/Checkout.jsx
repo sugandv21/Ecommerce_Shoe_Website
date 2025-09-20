@@ -11,7 +11,7 @@ import paypalImg from "../assets/images/paypal.png";
 import clearpayImg from "../assets/images/clearpay.png";
 import klarnaImg from "../assets/images/klarna.png";
 
-const API_ROOT = (import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api").replace(/\/+$/, "");
+const API_ROOT = (import.meta.env.VITE_API_URL || "https://django-4hm5.onrender.com/api").replace(/\/+$/, "");
 
 // Ensure axios sends cookies for cross-origin requests
 axios.defaults.withCredentials = true;
@@ -481,4 +481,5 @@ export default function Checkout() {
       </div>
     </div>
   );
+
 }
