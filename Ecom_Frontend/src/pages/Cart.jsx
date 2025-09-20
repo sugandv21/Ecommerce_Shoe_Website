@@ -10,7 +10,7 @@ import CartHeader from "../components/CartHeader";
 
 const API_ROOT = (import.meta.env?.VITE_API_URL || "https://django-4hm5.onrender.com/api").replace(/\/+$/, "");
 
-// Ensure axios sends cookies for session auth
+// Ensure axios sends cookies for session auth (kept in case backend needs cookies for cart)
 axios.defaults.withCredentials = true;
 
 export default function Cart() {
@@ -22,10 +22,6 @@ export default function Cart() {
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [message, setMessage] = useState("");
-
-  // auth state
-  const [user, setUser] = useState(null);
-  const [checkingAuth, setCheckingAuth] = useState(true);
 
   // Load cart and normalize items
   const fetchCart = async () => {
@@ -55,10 +51,7 @@ export default function Cart() {
     } catch (err) {
       console.error("fetchCart failed", err);
       const status = err?.response?.status;
-      if (status === 404)
-        setMessage("Cart endpoint not found (404). Check backend URLs.");
-      else if (status === 403)
-        setMessage("Authentication required to fetch cart. Please log in.");
+      if (status === 404) setMessage("Cart endpoint not found (404). Check backend URLs.");
       else setMessage("Failed to load cart.");
       setCartData({ items: [] });
     } finally {
@@ -278,29 +271,7 @@ export default function Cart() {
     }
   };
 
-  // --- Authentication helpers ---
-  const fetchMe = async () => {
-    setCheckingAuth(true);
-    try {
-      const res = await axios.get(`${API_ROOT}/auth/me/`);
-      setUser(res?.data ?? null);
-    } catch (err) {
-      // not authenticated or other error
-      setUser(null);
-    } finally {
-      setCheckingAuth(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchMe();
-    const onAuthUpdated = () => fetchMe();
-    window.addEventListener("authUpdated", onAuthUpdated);
-    return () => window.removeEventListener("authUpdated", onAuthUpdated);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Checkout flow — require login
+  // Checkout flow — NO login required now
   const handleCheckout = () => {
     setMessage("");
 
@@ -313,12 +284,7 @@ export default function Cart() {
       return;
     }
 
-    // if not authenticated, redirect to login page with next
-    if (!user) {
-      // include state.next so your AuthPage can navigate back after login
-      navigate("/auth?tab=login", { state: { next: "/checkout" } });
-      return;
-    }
+    setCheckoutLoading(true);
 
     // Build state object to send to checkout page
     const checkoutState = {
@@ -331,13 +297,18 @@ export default function Cart() {
       selectedPayment,
     };
 
+    // Navigate to checkout regardless of authentication
     navigate("/checkout", { state: checkoutState });
+    // keep UI responsive — stop spinner
+    setCheckoutLoading(false);
   };
 
   const cutoff = new Date();
   cutoff.setHours(cutoff.getHours() + 23);
   cutoff.setMinutes(cutoff.getMinutes() + 53);
   cutoff.setSeconds(cutoff.getSeconds() + 50);
+
+  const canCheckout = Boolean(selectedPayment && cartData.items?.length);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
@@ -401,36 +372,17 @@ export default function Cart() {
       <div className="bg-gray-50 rounded-md p-4">
         <button
           className={`w-full p-3 rounded text-white font-medium mb-4 flex items-center justify-center gap-2 ${
-            selectedPayment && cartData.items?.length && user
-              ? "bg-emerald-700"
-              : "bg-gray-400 cursor-not-allowed"
+            canCheckout ? "bg-emerald-700" : "bg-gray-400 cursor-not-allowed"
           }`}
           onClick={handleCheckout}
-          disabled={!selectedPayment || !cartData.items?.length || !user}
+          disabled={!canCheckout || checkoutLoading}
         >
           <img src={lock} alt="lock" className="w-4 h-4 object-contain" />
-          <span>
-            {user ? (checkoutLoading ? "Processing..." : "Checkout Securely") : "Login to Checkout"}
-          </span>
+          <span>{checkoutLoading ? "Processing..." : "Checkout Securely"}</span>
         </button>
-
-        {/* show helpful login prompt when not authenticated */}
-        {!checkingAuth && !user && (
-          <div className="text-center text-sm text-gray-700 mb-3">
-            You must{" "}
-            <button
-              onClick={() => navigate("/auth?tab=login", { state: { next: "/checkout" } })}
-              className="text-teal-700 underline"
-            >
-              log in
-            </button>{" "}
-            to complete your purchase.
-          </div>
-        )}
 
         <PaymentOptions value={selectedPayment} onChange={setSelectedPayment} />
       </div>
     </div>
   );
 }
-
