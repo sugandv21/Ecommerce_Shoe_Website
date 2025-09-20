@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const RAW_API = typeof import.meta !== "undefined" ? import.meta.env.VITE_API_URL : "";
-const API_ROOT = (RAW_API || "https://django-4hm5.onrender.com/api").replace(/\/+$/, "");
+const API_ROOT = (RAW_API || "https://django-4hm5.onrender.com/api").replace(/\/+$/, "") + "/";
 
 const api = axios.create({
   baseURL: API_ROOT,
@@ -76,8 +76,8 @@ async function safeLogResponse(err, label = "response") {
   }
 }
 
-/** Try GET candidates for cart endpoints */
-async function tryGetCandidates(candidates = ["/cart/my/", "/cart/my", "/cart/", "/cart"]) {
+/** Try GET candidates for cart endpoints (relative paths) */
+async function tryGetCandidates(candidates = ["cart/my/", "cart/my", "cart/", "cart"]) {
   let lastErr = null;
   for (const path of candidates) {
     try {
@@ -101,10 +101,10 @@ async function tryGetCandidates(candidates = ["/cart/my/", "/cart/my", "/cart/",
   throw lastErr;
 }
 
-/** Create empty cart */
+/** Create empty cart (relative path) */
 export async function createCart() {
   try {
-    const res = await api.post("/cart/", { items: [] });
+    const res = await api.post("cart/", { items: [] });
     return res.data || { items: [] };
   } catch (err) {
     await safeLogResponse(err, "createCart");
@@ -160,7 +160,7 @@ function mergeItems(existingItems = [], incoming = { product_id: null, quantity:
   return normalized;
 }
 
-/** updateCart wrapper */
+/** updateCart wrapper (relative paths) */
 export async function updateCart(cartId = null, payload = { items: [], replace: false }) {
   try {
     let id = cartId;
@@ -170,14 +170,14 @@ export async function updateCart(cartId = null, payload = { items: [], replace: 
       if (!id) throw new Error("No cart id available");
     }
     try {
-      const res = await api.put(`/cart/${id}/`, payload);
+      const res = await api.put(`cart/${id}/`, payload);
       notifyUpdated();
       return res.data;
     } catch (putErr) {
       await safeLogResponse(putErr, "updateCart.PUT");
       const status = putErr?.response?.status;
       if ([405, 400, 404].includes(status)) {
-        const res2 = await api.patch(`/cart/${id}/`, payload);
+        const res2 = await api.patch(`cart/${id}/`, payload);
         notifyUpdated();
         return res2.data;
       }
@@ -203,23 +203,23 @@ export async function addItem(productId, quantity = 1, size = "") {
 
     // Expanded candidate list (common variants) to increase chance of matching backend during debugging
     const paths = [
-      `/cart/${cartId}/add_item/`,
-      `/cart/${cartId}/add_item`,
-      `/cart/add_item/`,
-      `/cart/add_item`,
-      `/cart/${cartId}/add/`,
-      `/cart/${cartId}/items/`,
-      `/cart/${cartId}/items`,
-      `/cart/items/`,
-      `/cart/items`,
-      `/cart/add/`,
-      `/cart/add`,
-      `/cart-items/${cartId}/add/`,
-      `/cart-items/`,
-      `/carts/${cartId}/add_item/`,
-      `/carts/${cartId}/items/`,
-      `/cart/${cartId}/add-item/`,
-      `/cart/add-item/`,
+      `cart/${cartId}/add_item/`,
+      `cart/${cartId}/add_item`,
+      `cart/add_item/`,
+      `cart/add_item`,
+      `cart/${cartId}/add/`,
+      `cart/${cartId}/items/`,
+      `cart/${cartId}/items`,
+      `cart/items/`,
+      `cart/items`,
+      `cart/add/`,
+      `cart/add`,
+      `cart-items/${cartId}/add/`,
+      `cart-items/`,
+      `carts/${cartId}/add_item/`,
+      `carts/${cartId}/items/`,
+      `cart/${cartId}/add-item/`,
+      `cart/add-item/`,
     ];
 
     let lastErr = null;
@@ -280,11 +280,11 @@ export async function removeItem({ cartId = null, cart = null, cartItemId = null
     const id = cartId || current?.id;
     if (!id) throw new Error("No cart id to remove from");
 
-    // 1) If cartItemId provided: attempt DELETE /cart-items/<id>/
+    // 1) If cartItemId provided: attempt DELETE cart-items/<id>/
     if (cartItemId != null) {
       const deleteCandidates = [
-        `/cart-items/${cartItemId}/`,
-        `/cart-items/${cartItemId}`,
+        `cart-items/${cartItemId}/`,
+        `cart-items/${cartItemId}`,
       ];
       for (const p of deleteCandidates) {
         try {
@@ -312,12 +312,12 @@ export async function removeItem({ cartId = null, cart = null, cartItemId = null
 
     // 2) Try cart-level remove_item detail action (preferred fallback)
     const postCandidates = [
-      `/cart/${id}/remove_item/`,
-      `/cart/${id}/remove_item`,
-      `/cart/remove_item/`,
-      `/cart/remove_item`,
-      `/cart/${id}/remove/`,
-      `/cart/remove/`,
+      `cart/${id}/remove_item/`,
+      `cart/${id}/remove_item`,
+      `cart/remove_item/`,
+      `cart/remove_item`,
+      `cart/${id}/remove/`,
+      `cart/remove/`,
     ];
     const payloadById = cartItemId != null ? { cartItemId } : null;
     const payloadByProduct = productId != null ? { productId, size } : null;
