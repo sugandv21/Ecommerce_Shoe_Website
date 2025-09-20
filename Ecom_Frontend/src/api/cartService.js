@@ -1,4 +1,3 @@
-// src/api/cartService.js
 import axios from "axios";
 
 const RAW_API = typeof import.meta !== "undefined" ? import.meta.env.VITE_API_URL : "";
@@ -30,17 +29,20 @@ function getCsrfToken() {
  * Auto-inject CSRF header for unsafe HTTP methods if token present.
  * This keeps callers simpler so they don't need to pass headers manually.
  */
-api.interceptors.request.use((config) => {
-  const method = (config.method || "").toUpperCase();
-  if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
-    const token = getCsrfToken();
-    if (token) {
-      config.headers = config.headers || {};
-      config.headers["X-CSRFToken"] = token;
+api.interceptors.request.use(
+  (config) => {
+    const method = (config.method || "").toUpperCase();
+    if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
+      const token = getCsrfToken();
+      if (token) {
+        config.headers = config.headers || {};
+        config.headers["X-CSRFToken"] = token;
+      }
     }
-  }
-  return config;
-}, (err) => Promise.reject(err));
+    return config;
+  },
+  (err) => Promise.reject(err)
+);
 
 function notifyUpdated() {
   try {
@@ -199,16 +201,37 @@ export async function addItem(productId, quantity = 1, size = "") {
     const cartId = cart.id;
     if (!cartId) throw new Error("No cart id available");
 
+    // Expanded candidate list (common variants) to increase chance of matching backend during debugging
     const paths = [
       `/cart/${cartId}/add_item/`,
       `/cart/${cartId}/add_item`,
       `/cart/add_item/`,
       `/cart/add_item`,
+      `/cart/${cartId}/add/`,
+      `/cart/${cartId}/items/`,
+      `/cart/${cartId}/items`,
+      `/cart/items/`,
+      `/cart/items`,
+      `/cart/add/`,
+      `/cart/add`,
+      `/cart-items/${cartId}/add/`,
+      `/cart-items/`,
+      `/carts/${cartId}/add_item/`,
+      `/carts/${cartId}/items/`,
+      `/cart/${cartId}/add-item/`,
+      `/cart/add-item/`,
     ];
 
     let lastErr = null;
     for (const p of paths) {
       try {
+        // Helpful debug: log the full resolved URL we are about to POST to
+        try {
+          console.info("[cartService] Trying POST", new URL(p, api.defaults.baseURL).toString());
+        } catch (e) {
+          // ignore URL construction errors
+        }
+
         const res = await api.post(p, { product_id: productId, quantity, size });
         notifyUpdated();
         return res.data;
@@ -223,6 +246,7 @@ export async function addItem(productId, quantity = 1, size = "") {
         }
         const status = err?.response?.status;
         if (status === 401 || status === 403) throw err;
+        // continue trying next candidate
       }
     }
 
@@ -292,9 +316,11 @@ export async function removeItem({ cartId = null, cart = null, cartItemId = null
       `/cart/${id}/remove_item`,
       `/cart/remove_item/`,
       `/cart/remove_item`,
+      `/cart/${id}/remove/`,
+      `/cart/remove/`,
     ];
     const payloadById = cartItemId != null ? { cartItemId } : null;
-    const payloadByProduct = (productId != null) ? { productId, size } : null;
+    const payloadByProduct = productId != null ? { productId, size } : null;
 
     for (const p of postCandidates) {
       try {
@@ -363,4 +389,3 @@ export default {
   updateCart,
   removeItem,
 };
-
