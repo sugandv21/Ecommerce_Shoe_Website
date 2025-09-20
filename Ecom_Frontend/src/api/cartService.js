@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const RAW_API = typeof import.meta !== "undefined" ? import.meta.env.VITE_API_URL : "";
-const API_ROOT = (RAW_API || "http://127.0.0.1:8000/api").replace(/\/+$/, "");
+const API_ROOT = (RAW_API || "https://django-4hm5.onrender.com/api").replace(/\/+$/, "");
 
 const api = axios.create({
   baseURL: API_ROOT,
@@ -363,3 +363,4 @@ export default {
   updateCart,
   removeItem,
 };
+
