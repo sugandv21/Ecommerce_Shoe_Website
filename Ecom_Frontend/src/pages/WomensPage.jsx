@@ -4,7 +4,7 @@ import FiltersPanel from "../components/FiltersPanel";
 import ProductCard from "../components/ProductCard";
 import cartService from "../api/cartService";
 
-const API_ROOT =
+const RAW_API_ROOT =
   typeof import.meta !== "undefined" ? import.meta.env.VITE_API_URL || "https://django-4hm5.onrender.com/api" : "";
 
 export default function WomensPage() {
@@ -39,7 +39,8 @@ export default function WomensPage() {
   const [cartPreview, setCartPreview] = useState({ items: [], total: 0 });
   const [cartLoading, setCartLoading] = useState(false);
 
-  const normalizedApi = useMemo(() => API_ROOT.replace(/\/+$/, ""), []);
+  // normalized API root (no trailing slash)
+  const normalizedApi = useMemo(() => (String(RAW_API_ROOT || "").replace(/\/+$/, "")), [RAW_API_ROOT]);
 
   // ----- Sorting helpers -----
   const toNumber = (v) => {
@@ -145,26 +146,27 @@ export default function WomensPage() {
   const fetchProducts = useCallback(
     async (reset = false) => {
       try {
+        setError(null);
         if (reset) {
           setLoading(true);
-          setOffset(0);
         } else {
           setLoadingMore(true);
         }
-        setError(null);
 
-        const params = buildParams(reset ? 0 : offset + PAGE_SIZE);
+        const desiredOffset = reset ? 0 : offset;
+        const params = buildParams(desiredOffset);
         const url = `${normalizedApi}/products/`;
 
         const res = await axios.get(url, { params, timeout: 10000 });
         const data = res.data || {};
-        const list = data.results || data || [];
+        // endpoint might return { results: [...], count: N } or an array
+        const list = Array.isArray(data) ? data : data.results ?? data.items ?? [];
 
         if (reset) {
           const sorted = sortProducts(list, sortBy);
           setProducts(sorted);
-          setCount(data.count || sorted.length);
-          setOffset(0);
+          setCount(typeof data.count === "number" ? data.count : sorted.length);
+          setOffset(list.length >= PAGE_SIZE ? PAGE_SIZE : list.length); // next offset
         } else {
           setProducts((prev) => {
             const combined = [...prev, ...list];
@@ -177,8 +179,9 @@ export default function WomensPage() {
             });
             return deduped;
           });
-          setCount(data.count || products.length + list.length);
-          setOffset((o) => o + PAGE_SIZE);
+          // update count safely
+          setCount((prevCount) => (typeof data.count === "number" ? data.count : Math.max(prevCount, offset + list.length)));
+          setOffset((o) => o + list.length);
         }
       } catch (err) {
         console.error("Failed to fetch products", err);
@@ -188,7 +191,7 @@ export default function WomensPage() {
         setLoadingMore(false);
       }
     },
-    [normalizedApi, buildParams, offset, products.length, sortBy, sortProducts]
+    [normalizedApi, buildParams, offset, sortBy, sortProducts]
   );
 
   // ----- Effects for products/filters -----
@@ -198,10 +201,15 @@ export default function WomensPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // re-fetch when filters / sorting change (reset list)
   useEffect(() => {
+    // reset offset and fetch new results
+    setOffset(0);
     fetchProducts(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [applied, sortBy]);
 
+  // If only sort display needs to reorder existing list, handle locally:
   useEffect(() => {
     setProducts((prev) => sortProducts(prev, sortBy));
   }, [sortBy, sortProducts]);
@@ -265,12 +273,12 @@ export default function WomensPage() {
         // get or create cart
         let cart = await cartService.getCart();
         if (!cart || !cart.id) {
-          // create an empty cart
-          const create = await cartService.createCart ? await cartService.createCart({ items: [] }) : null;
-          if (create && create.id) {
+          // try cartService.createCart if available
+          if (typeof cartService.createCart === "function") {
+            const create = await cartService.createCart({ items: [] });
             cart = create;
           } else {
-            // fallback: call API directly (least desirable)
+            // fallback: create via API directly
             const createdRes = await axios.post(`${normalizedApi}/cart/`, { items: [] });
             cart = createdRes.data;
           }
@@ -349,8 +357,6 @@ export default function WomensPage() {
   // ----- Render -----
   return (
     <div>
-    
-
       <main className="max-w-screen-2xl mx-auto px-6 py-8">
         <div className="flex flex-col lg:flex-row gap-6 items-start">
           <div className="flex-1">
@@ -446,4 +452,3 @@ export default function WomensPage() {
     </div>
   );
 }
-
