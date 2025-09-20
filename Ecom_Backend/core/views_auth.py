@@ -15,12 +15,23 @@ from .serializers_auth import RegisterSerializer, LoginSerializer
 User = get_user_model()
 signer = TimestampSigner()
 
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+@ensure_csrf_cookie
+def csrf(request):
+    """
+    Simple endpoint clients can call to ensure CSRF cookie is set.
+    """
+    return Response({"detail": "csrf cookie set"})
+
+
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def me(request):
     """
     Return user info when authenticated; otherwise return null (200).
-    This prevents 401 responses for anonymous requests and keeps frontend console quiet.
+    This prevents 401 responses for anonymous requests and is safe to call from the frontend.
     """
     user = request.user
     if user and user.is_authenticated:
@@ -40,8 +51,12 @@ class RegisterAPIView(generics.CreateAPIView):
         verify_path = reverse("auth-verify-email")
         verify_url = f"{self.request.scheme}://{self.request.get_host()}{verify_path}?token={token}"
         subject = "Verify your StepUp account"
-        message = f"Thanks for registering.\n\nPlease confirm your email by visiting:\n\n{verify_url}\n\nThis link will expire in 1 day."
+        message = (
+            f"Thanks for registering.\n\nPlease confirm your email by visiting:\n\n"
+            f"{verify_url}\n\nThis link will expire in 1 day."
+        )
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=False)
+
 
 class VerifyEmailAPIView(generics.GenericAPIView):
     permission_classes = [AllowAny]
@@ -80,11 +95,3 @@ class LoginAPIView(generics.GenericAPIView):
 def logout_view(request):
     django_logout(request)
     return Response({"detail": "Logged out"})
-
-
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def me(request):
-    user = request.user
-    return Response({"id": user.id, "username": user.username, "email": user.email})
-
