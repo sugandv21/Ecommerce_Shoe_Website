@@ -1,4 +1,3 @@
-# core/views_auth.py
 from django.conf import settings
 from django.contrib.auth import login as django_login, logout as django_logout, get_user_model
 from django.core.mail import send_mail
@@ -95,3 +94,4 @@ class LoginAPIView(generics.GenericAPIView):
 def logout_view(request):
     django_logout(request)
     return Response({"detail": "Logged out"})
+
