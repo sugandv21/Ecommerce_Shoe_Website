@@ -1,7 +1,6 @@
 // src/pages/Cart.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import axios from "axios";
 import PaymentOptions from "../components/PaymentOptions";
 import CartItem from "../components/CartItem";
@@ -10,6 +9,9 @@ import lock from "../assets/images/lock.png";
 import CartHeader from "../components/CartHeader";
 
 const API_ROOT = (import.meta.env?.VITE_API_URL || "http://127.0.0.1:8000/api").replace(/\/+$/, "");
+
+// Ensure axios sends cookies for session auth
+axios.defaults.withCredentials = true;
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -21,6 +23,10 @@ export default function Cart() {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+  // auth state
+  const [user, setUser] = useState(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
   // Load cart and normalize items
   const fetchCart = async () => {
     setMessage("");
@@ -30,13 +36,18 @@ export default function Cart() {
       const cart = data || { items: [] };
 
       const normalizedItems = (cart.items || []).map((it) => {
-        const product = it.product || it.product_data || (it.product_id ? { id: it.product_id, price: it.price } : null);
+        const product =
+          it.product ||
+          it.product_data ||
+          (it.product_id ? { id: it.product_id, price: it.price } : null);
         return {
           id: it.id,
           product,
           quantity: Number(it.quantity ?? it.qty ?? 1),
           size: it.size ?? "",
-          line_total: it.line_total ?? (product ? (product.price || 0) * (it.quantity || 1) : 0),
+          line_total:
+            it.line_total ??
+            (product ? (product.price || 0) * (it.quantity || 1) : 0),
         };
       });
 
@@ -44,8 +55,10 @@ export default function Cart() {
     } catch (err) {
       console.error("fetchCart failed", err);
       const status = err?.response?.status;
-      if (status === 404) setMessage("Cart endpoint not found (404). Check backend URLs.");
-      else if (status === 403) setMessage("Authentication required to fetch cart. Please log in.");
+      if (status === 404)
+        setMessage("Cart endpoint not found (404). Check backend URLs.");
+      else if (status === 403)
+        setMessage("Authentication required to fetch cart. Please log in.");
       else setMessage("Failed to load cart.");
       setCartData({ items: [] });
     } finally {
@@ -61,6 +74,7 @@ export default function Cart() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Subtotal
   const subtotal = (cartData.items || []).reduce(
     (s, it) => s + (it.product?.price || 0) * (it.quantity || 0),
     0
@@ -68,11 +82,17 @@ export default function Cart() {
 
   // utility to build payload expected by updateCart
   const buildPayloadItems = (items) =>
-    (items || []).map((it) => ({
-      product_id: it.product?.id ?? it.product_id ?? (it.product && it.product.id) ?? null,
-      quantity: Number(it.quantity ?? 1),
-      size: it.size ?? "",
-    })).filter(i => i.product_id != null);
+    (items || [])
+      .map((it) => ({
+        product_id:
+          it.product?.id ??
+          it.product_id ??
+          (it.product && it.product.id) ??
+          null,
+        quantity: Number(it.quantity ?? 1),
+        size: it.size ?? "",
+      }))
+      .filter((i) => i.product_id != null);
 
   // Update entire cart (replace)
   const updateCart = async (items, replace = true) => {
@@ -109,15 +129,14 @@ export default function Cart() {
     setMessage("");
     setActionLoading(true);
 
-    // Optimistic UI update: remove the item locally immediately so user sees it gone
+    // Optimistic UI update
     const optimisticNext = (cartData.items || []).filter((it) => {
       if (cartItemId != null) return String(it.id) !== String(cartItemId);
       return !(it.product?.id === productId && (it.size || "") === (size || ""));
     });
-    setCartData(prev => ({ ...prev, items: optimisticNext }));
+    setCartData((prev) => ({ ...prev, items: optimisticNext }));
 
     try {
-      // Try server-side removal first (cartService has many fallbacks inside)
       await cartService.removeItem({
         cart: cartData,
         cartId: cartData?.id ?? null,
@@ -126,38 +145,34 @@ export default function Cart() {
         size: size,
       });
 
-      // success: refresh canonical state
       await fetchCart();
     } catch (err) {
-      // Log full error for debugging
       console.error("removeItem server attempt failed, falling back to updateCart. error:", err);
       setMessage("Server remove failed — attempting client-side fallback.");
 
       try {
-        // Build items payload excluding the removed rows (same logic as cartService fallback)
-        const itemsPayload = (cartData.items || []).filter(ci => {
-          if (cartItemId != null) return String(ci.id) !== String(cartItemId);
-          const ciPid = ci.product?.id ?? ci.product_id ?? null;
-          if (ciPid == null) return true;
-          const ciPidStr = String(ciPid);
-          const ciSize = (ci.size || "").toString();
-          return !(ciPidStr === String(productId) && ciSize === (size || "").toString());
-        }).map(ci => ({
-          product_id: ci.product?.id ?? ci.product_id,
-          quantity: Number(ci.quantity ?? ci.qty ?? 1),
-          size: ci.size || "",
-        }));
+        const itemsPayload = (cartData.items || [])
+          .filter((ci) => {
+            if (cartItemId != null) return String(ci.id) !== String(cartItemId);
+            const ciPid = ci.product?.id ?? ci.product_id ?? null;
+            if (ciPid == null) return true;
+            const ciPidStr = String(ciPid);
+            const ciSize = (ci.size || "").toString();
+            return !(ciPidStr === String(productId) && ciSize === (size || "").toString());
+          })
+          .map((ci) => ({
+            product_id: ci.product?.id ?? ci.product_id,
+            quantity: Number(ci.quantity ?? ci.qty ?? 1),
+            size: ci.size || "",
+          }));
 
-        // If payload equals existing (nothing removed) warn and stop
         if ((cartData.items || []).length - itemsPayload.length === 0) {
           console.warn("[Cart.handleRemove] fallback did not find matching rows to remove", { cartItemId, productId, size });
           setMessage("Could not find matching item to remove.");
-          // Refresh from server to keep canonical state
           await fetchCart();
           return;
         }
 
-        // Ensure we have a cartId (getCart will create if needed)
         let cid = cartData?.id;
         if (!cid) {
           const created = await cartService.getCart();
@@ -168,16 +183,13 @@ export default function Cart() {
           return;
         }
 
-        // Call updateCart directly to apply replacement on the backend
         await cartService.updateCart(cid, { items: itemsPayload, replace: true });
 
-        // Refresh canonical cart
         await fetchCart();
         setMessage("Item removed (client-side fallback).");
       } catch (fallbackErr) {
         console.error("Client-side fallback updateCart failed:", fallbackErr);
         setMessage("Remove failed (server + client fallback). See console for details.");
-        // restore original cart view from server to avoid wrong UI state
         try { await fetchCart(); } catch (e) { /* ignore */ }
       }
     } finally {
@@ -190,21 +202,21 @@ export default function Cart() {
     setMessage("");
     setActionLoading(true);
     try {
-      // produce items list from local cartData, updating the row with matching id
       const items = (cartData.items || []).map((it) => {
         if (String(it.id) === String(cartItemId)) {
-          // update this row
           return { product: { id: it.product?.id ?? it.product_id }, quantity: Number(qty || 1), size: it.size ?? "" };
         }
-        // keep other rows
         return { product: { id: it.product?.id ?? it.product_id }, quantity: Number(it.quantity || 1), size: it.size ?? "" };
       });
 
-      // if not found (edge case), append new
-      const found = items.some(it => String(it.product?.id) === String((cartData.items || []).find(ci => String(ci.id) === String(cartItemId))?.product?.id) && (it.size || "") === (size || ""));
+      const found = items.some(
+        (it) =>
+          String(it.product?.id) ===
+            String((cartData.items || []).find((ci) => String(ci.id) === String(cartItemId))?.product?.id) &&
+          (it.size || "") === (size || "")
+      );
       if (!found) {
-        // locate product id from local cart row fallback
-        const source = (cartData.items || []).find(it => String(it.id) === String(cartItemId));
+        const source = (cartData.items || []).find((it) => String(it.id) === String(cartItemId));
         const pid = source?.product?.id ?? source?.product_id;
         if (pid) items.push({ product: { id: pid }, quantity: Number(qty || 1), size: size || "" });
       }
@@ -225,30 +237,26 @@ export default function Cart() {
     try {
       const items = (cartData.items || []).slice();
 
-      // find the source by id (preferred)
-      const srcIndex = items.findIndex(it => String(it.id) === String(cartItemId));
+      const srcIndex = items.findIndex((it) => String(it.id) === String(cartItemId));
       if (srcIndex === -1) {
-        // fallback: find by productId + prevSize
-        const idx2 = items.findIndex(it => (it.product?.id === productId) && ((it.size || "") === (prevSize || "")));
+        const idx2 = items.findIndex((it) => (it.product?.id === productId) && ((it.size || "") === (prevSize || "")));
         if (idx2 === -1) {
           await fetchCart();
           setActionLoading(false);
           return;
         }
-        // use idx2 as source
         const src = items[idx2];
         items.splice(idx2, 1);
-        const existingIndex = items.findIndex(it => (it.product?.id === productId) && ((it.size || "") === (newSize || "")));
+        const existingIndex = items.findIndex((it) => (it.product?.id === productId) && ((it.size || "") === (newSize || "")));
         if (existingIndex !== -1) {
           items[existingIndex].quantity = Number(items[existingIndex].quantity || 0) + Number(src.quantity || 0);
         } else {
           items.push({ product: { id: productId }, quantity: Number(src.quantity || 1), size: newSize || "" });
         }
       } else {
-        // source found by cartItemId
         const src = items[srcIndex];
         items.splice(srcIndex, 1);
-        const existingIndex = items.findIndex(it => (it.product?.id === productId) && ((it.size || "") === (newSize || "")));
+        const existingIndex = items.findIndex((it) => (it.product?.id === productId) && ((it.size || "") === (newSize || "")));
         if (existingIndex !== -1) {
           items[existingIndex].quantity = Number(items[existingIndex].quantity || 0) + Number(src.quantity || 0);
         } else {
@@ -256,8 +264,7 @@ export default function Cart() {
         }
       }
 
-      // Build payload and update
-      const payloadItems = items.map(it => ({
+      const payloadItems = items.map((it) => ({
         product: { id: it.product?.id ?? it.product_id ?? (it.product && it.product.id) },
         quantity: Number(it.quantity || 1),
         size: it.size || "",
@@ -271,34 +278,61 @@ export default function Cart() {
     }
   };
 
-
-const handleCheckout = () => {
-  setMessage("");
-
-  if (!selectedPayment) {
-    setMessage("Please select a payment method before checkout.");
-    return;
-  }
-  if (!cartData.items || cartData.items.length === 0) {
-    setMessage("Cart is empty.");
-    return;
-  }
-
-  // Build state object to send to checkout page
-  const checkoutState = {
-    cartId: cartData.id ?? null,
-    items: cartData.id ? undefined : (cartData.items || []), // prefer cartId if available
-    subtotal: (cartData.items || []).reduce(
-      (s, it) => s + (it.product?.price || 0) * (it.quantity || 0),
-      0
-    ),
-    selectedPayment, // pass chosen payment method
+  // --- Authentication helpers ---
+  const fetchMe = async () => {
+    setCheckingAuth(true);
+    try {
+      const res = await axios.get(`${API_ROOT}/auth/me/`);
+      setUser(res?.data ?? null);
+    } catch (err) {
+      // not authenticated or other error
+      setUser(null);
+    } finally {
+      setCheckingAuth(false);
+    }
   };
 
-  // navigate to checkout page
-  navigate("/checkout", { state: checkoutState });
-};
+  useEffect(() => {
+    fetchMe();
+    const onAuthUpdated = () => fetchMe();
+    window.addEventListener("authUpdated", onAuthUpdated);
+    return () => window.removeEventListener("authUpdated", onAuthUpdated);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  // Checkout flow — require login
+  const handleCheckout = () => {
+    setMessage("");
+
+    if (!selectedPayment) {
+      setMessage("Please select a payment method before checkout.");
+      return;
+    }
+    if (!cartData.items || cartData.items.length === 0) {
+      setMessage("Cart is empty.");
+      return;
+    }
+
+    // if not authenticated, redirect to login page with next
+    if (!user) {
+      // include state.next so your AuthPage can navigate back after login
+      navigate("/auth?tab=login", { state: { next: "/checkout" } });
+      return;
+    }
+
+    // Build state object to send to checkout page
+    const checkoutState = {
+      cartId: cartData.id ?? null,
+      items: cartData.id ? undefined : cartData.items || [], // prefer cartId if available
+      subtotal: (cartData.items || []).reduce(
+        (s, it) => s + (it.product?.price || 0) * (it.quantity || 0),
+        0
+      ),
+      selectedPayment,
+    };
+
+    navigate("/checkout", { state: checkoutState });
+  };
 
   const cutoff = new Date();
   cutoff.setHours(cutoff.getHours() + 23);
@@ -366,18 +400,33 @@ const handleCheckout = () => {
 
       <div className="bg-gray-50 rounded-md p-4">
         <button
-  className={`w-full p-3 rounded text-white font-medium mb-4 flex items-center justify-center gap-2 ${
-    selectedPayment && cartData.items?.length
-      ? "bg-emerald-700"
-      : "bg-gray-400 cursor-not-allowed"
-  }`}
-  onClick={handleCheckout}
-  disabled={!selectedPayment || !cartData.items?.length}
->
-  <img src={lock} alt="lock" className="w-4 h-4 object-contain" />
-  <span>Checkout Securely</span>
-</button>
+          className={`w-full p-3 rounded text-white font-medium mb-4 flex items-center justify-center gap-2 ${
+            selectedPayment && cartData.items?.length && user
+              ? "bg-emerald-700"
+              : "bg-gray-400 cursor-not-allowed"
+          }`}
+          onClick={handleCheckout}
+          disabled={!selectedPayment || !cartData.items?.length || !user}
+        >
+          <img src={lock} alt="lock" className="w-4 h-4 object-contain" />
+          <span>
+            {user ? (checkoutLoading ? "Processing..." : "Checkout Securely") : "Login to Checkout"}
+          </span>
+        </button>
 
+        {/* show helpful login prompt when not authenticated */}
+        {!checkingAuth && !user && (
+          <div className="text-center text-sm text-gray-700 mb-3">
+            You must{" "}
+            <button
+              onClick={() => navigate("/auth?tab=login", { state: { next: "/checkout" } })}
+              className="text-teal-700 underline"
+            >
+              log in
+            </button>{" "}
+            to complete your purchase.
+          </div>
+        )}
 
         <PaymentOptions value={selectedPayment} onChange={setSelectedPayment} />
       </div>

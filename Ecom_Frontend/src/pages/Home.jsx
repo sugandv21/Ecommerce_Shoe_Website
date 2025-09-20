@@ -64,7 +64,6 @@ const Home = () => {
 
   return (
     <div className="w-full">
-      {/* Section 1: Banner Slider */}
       <div className="relative w-full h-[400px] md:h-[500px]">
         <Swiper
           modules={[Pagination, Autoplay]}
@@ -74,22 +73,18 @@ const Home = () => {
           className="h-full"
         >
           {banners.map((banner, idx) => {
-            // per-index classes for text and button separately
-            // Text position
             let textPosClass = "top-6 left-6 md:top-10 md:left-14";
             if (idx === 0) textPosClass = "top-6 left-6 md:top-10 md:left-14";
             if (idx === 1) textPosClass = "top-6 right-6 md:top-10 md:right-14";
             if (idx === 2) textPosClass = "bottom-6 right-6 md:bottom-52 md:right-14";
             if (idx === 3) textPosClass = "bottom-6 left-6 md:bottom-52 md:left-14";
 
-            // Button position (independent)
             let buttonPosClass = "bottom-6 left-6 md:bottom-10 md:left-14";
             if (idx === 0) buttonPosClass = "bottom-6 left-6 md:bottom-10 md:left-14";
             if (idx === 1) buttonPosClass = "bottom-6 right-6 md:bottom-20 md:right-36";
             if (idx === 2) buttonPosClass = "top-6 right-6 md:top-96 md:right-14";
             if (idx === 3) buttonPosClass = "top-6 left-6 md:top-80 md:left-14";
 
-            // overlay color scheme
             const darkOverlay = idx === 0 || idx === 1 || idx === 3;
 
             return (
@@ -121,7 +116,6 @@ const Home = () => {
                     </div>
                   )}
 
-                  {/* Button (separate absolute) */}
                   {banner.button_text && (
                     <div className={`absolute ${buttonPosClass} z-20`}>
                       <a
@@ -142,7 +136,6 @@ const Home = () => {
         </Swiper>
       </div>
 
-      {/* Section 2: Overview */}
       {overview && (
         <div className="text-center max-w-5xl mx-auto px-6 py-12">
           <h2 className="text-3xl font-bold mb-4">{overview.title}</h2>
@@ -150,7 +143,6 @@ const Home = () => {
         </div>
       )}
 
-      {/* Section 3: Categories */}
       <div className="py-12 px-6 text-center">
         <h2 className="text-3xl font-bold mb-8">What are you looking for?</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-20 max-w-7xl mx-auto">
@@ -184,7 +176,6 @@ const Home = () => {
 
       <NewTrending />
 
-      {/* Section 4: Sliding Text Banner */}
       <div className="relative h-[60px] flex justify-center items-center overflow-hidden">
         {messages.map((msg, idx) => (
           <p

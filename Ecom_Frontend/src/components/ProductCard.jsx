@@ -126,28 +126,31 @@ export default function ProductCard({ product = {}, onAddToCart }) {
 
   return (
     <article className="bg-white shadow-md rounded-md overflow-hidden" role="group" aria-label={product.title || "product"}>
-      <div className="h-56 md:h-64 bg-gray-100 flex items-center justify-center">
-        {imgUrl ? (
-          <Link
-            to={`/product/${product.id}`}
-            state={{ size, qty }}
-            onClick={stop}
-            className="block h-full w-full"
-            aria-label={`Open ${product.title} details`}
-          >
-            <img
-              src={imgUrl}
-              alt={product.title || "Product image"}
-              className="object-contain h-full w-full"
-              onError={(e) => {
-                e.currentTarget.src = placeholder;
-              }}
-            />
-          </Link>
-        ) : (
-          <div className="text-gray-400">No image</div>
-        )}
-      </div>
+      <div className="h-56 md:h-64">
+  {imgUrl ? (
+    <Link
+      to={`/product/${product.id}`}
+      state={{ size, qty }}
+      onClick={stop}
+      className="block h-full w-full"
+      aria-label={`Open ${product.title} details`}
+    >
+      <img
+        src={imgUrl}
+        alt={product.title || "Product image"}
+        className="object-cover h-full w-full"
+        onError={(e) => {
+          e.currentTarget.src = placeholder;
+        }}
+      />
+    </Link>
+  ) : (
+    <div className="flex items-center justify-center h-full w-full text-gray-400 bg-gray-50">
+      No image
+    </div>
+  )}
+</div>
+
 
       <div className="p-4">
         <h4 className="font-bold text-lg">

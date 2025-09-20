@@ -15,3 +15,33 @@
 /* *{
   outline: 1px solid red !important;
 }  */
+
+/* Swiper Pagination Custom Styles (box-shadow approach) */
+.swiper-pagination .swiper-pagination-bullet {
+  width: 12px;                       /* inner circle size */
+  height: 12px;
+  margin: 0 10px !important;         /* more gap between bullets */
+  background: white !important;      /* inner fill */
+  border: 2px solid black;           /* inner border */
+  border-radius: 50%;
+  position: relative;
+  box-sizing: border-box;
+  transition: background .18s ease, transform .12s ease;
+  overflow: visible;
+
+  /* reduced outer ring thickness */
+  box-shadow:
+    0 0 0 4px #cfcfcf,   /* thinner gray gap ring */
+    0 0 0 6px black;     /* thinner black outer ring */
+  z-index: 2;
+}
+
+/* Active bullet: inner color and slightly larger ring */
+.swiper-pagination .swiper-pagination-bullet-active {
+  background: teal !important;
+  transform: scale(1.1);
+  box-shadow:
+    0 0 0 5px #cfcfcf,   /* slightly larger gray gap */
+    0 0 0 7px black;     /* slightly larger black outer ring */
+  z-index: 3;
+}

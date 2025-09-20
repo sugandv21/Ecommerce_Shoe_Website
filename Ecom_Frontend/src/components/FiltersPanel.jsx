@@ -18,7 +18,6 @@ export default function FiltersPanel({ filterSets = {}, applied = {}, onApply = 
     return {
       id: opt.id ?? `${key}-${idx}-${opt.value ?? opt.name ?? JSON.stringify(opt)}`,
       label: opt.label ?? opt.name ?? opt.value ?? String(opt),
-      // for color prefer hex/value, else slug/id
       value: opt.hex ?? opt.value ?? opt.slug ?? opt.id ?? opt.name ?? String(opt),
     };
   };
@@ -73,7 +72,6 @@ export default function FiltersPanel({ filterSets = {}, applied = {}, onApply = 
       );
     }
 
-    // Default: checkbox list
     return (
       <div className="p-3">
         <ul className="space-y-2 max-h-64 overflow-y-auto">
@@ -110,7 +108,7 @@ export default function FiltersPanel({ filterSets = {}, applied = {}, onApply = 
               <div key={p.key} className="relative">
                 <button
                   onClick={() => setActivePanel((prev) => (prev === p.key ? null : p.key))}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded font-medium text-gray-800"
+                  className="flex items-center gap-4 px-10 py-2 bg-gray-100 rounded font-medium text-gray-800 text-lg"
                   aria-expanded={isActive}
                   aria-controls={`panel-${p.key}`}
                 >
@@ -118,7 +116,6 @@ export default function FiltersPanel({ filterSets = {}, applied = {}, onApply = 
                   <span className="text-sm">{isActive ? "▲" : "▼"}</span>
                 </button>
 
-                {/* dropdown below header */}
                 {isActive && (
                   <div
                     id={`panel-${p.key}`}

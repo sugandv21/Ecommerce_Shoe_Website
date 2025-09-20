@@ -5,8 +5,17 @@ import axios from "axios";
 
 const API_ROOT = (import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api").replace(/\/+$/, "");
 
+// Best-effort CSRF setter (call once before protected requests)
+async function ensureCsrf() {
+  try {
+    await axios.get(`${API_ROOT}/auth/csrf/`, { withCredentials: true });
+  } catch (err) {
+    // ignore — we still try to send cookies/headers; log for debugging only
+    // console.warn("ensureCsrf failed:", err?.response?.data ?? err?.message);
+  }
+}
+
 function DecorativeTick({ size = 120 }) {
-  // Renders a circular tick with surrounding small dots (pure CSS + SVG)
   const dots = [
     { x: -46, y: -12, s: 6 },
     { x: -28, y: -44, s: 8 },
@@ -22,14 +31,13 @@ function DecorativeTick({ size = 120 }) {
 
   return (
     <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
-      {/* main circle with checkmark (SVG) */}
       <div
         aria-hidden
         className="rounded-full flex items-center justify-center"
         style={{
           width: size * 0.65,
           height: size * 0.65,
-          background: "#274541", // same green
+          background: "#274541",
           boxShadow: "0 8px 16px rgba(0,0,0,0.08)",
         }}
       >
@@ -38,7 +46,6 @@ function DecorativeTick({ size = 120 }) {
         </svg>
       </div>
 
-      {/* decorative dots */}
       {dots.map((d, i) => (
         <span
           key={i}
@@ -89,46 +96,88 @@ export default function OrderConfirmation() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // ensure axios sends cookies on all requests in this component
+  axios.defaults.withCredentials = true;
 
   useEffect(() => {
     let cancelled = false;
+
     (async () => {
       if (!id) {
         setLoading(false);
         return;
       }
+
+      // Best-effort: request CSRF cookie prior to protected GET (useful if backend expects it)
+      await ensureCsrf();
+
       try {
         setLoading(true);
+        setError(null);
+
+        // Primary fetch: order detail (may require authenticated session)
         const res = await axios.get(`${API_ROOT}/orders/${id}/`, { withCredentials: true });
         if (cancelled) return;
         setOrder(res.data);
       } catch (err) {
-        console.error("Failed to load order:", err);
-        setOrder(null);
+        // Save last axios error to window for quick console inspection
+        window.lastAxiosError = err;
+
+        // Log full response if present (server returns helpful "detail")
+        console.warn("Failed to load order:", err?.response?.status, err?.response?.data ?? err?.message);
+
+        if (err?.response) {
+          const status = err.response.status;
+          const body = err.response.data;
+          setError(`Order fetch failed (${status}): ${JSON.stringify(body)}`);
+
+          // fallback: if auth/ownership or not found, try tracking-only endpoint (also sends credentials)
+          if (status === 401 || status === 403 || status === 404) {
+            try {
+              const t = await axios.get(`${API_ROOT}/orders/${id}/tracking/`, { withCredentials: true });
+              if (cancelled) return;
+              // we only have tracking events — create placeholder order for UI
+              const evlist = (t.data || []).slice().sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+              // convert to a minimal order object so modal can still render
+              setOrder({ id, items: [], total_amount: "—", payment_method: "—", tracking_events: evlist });
+              setError(null); // clear error because fallback succeeded
+            } catch (err2) {
+              window.lastAxiosError = err2;
+              console.warn("Tracking-only fetch failed:", err2?.response?.status, err2?.response?.data ?? err2?.message);
+              setError(`Tracking fetch failed: ${err2?.response?.status ?? "network error"}`);
+            }
+          }
+        } else {
+          setError("Network error fetching order. Check server/CORS.");
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
     })();
-    return () => { cancelled = true; };
-  }, [id]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id, location.key]);
 
   async function openModal() {
     setModalOpen(true);
-    // If we don't already have items full details (order may have them already), ensure loaded
-    if (!order) {
-      setModalLoading(true);
-      try {
-        const res = await axios.get(`${API_ROOT}/orders/${id}/`, { withCredentials: true });
-        setOrder(res.data);
-      } catch (err) {
-        console.error("Failed to load order details for modal:", err);
-      } finally {
-        setModalLoading(false);
-      }
+    if (order && order.items && order.items.length > 0) return;
+    setModalLoading(true);
+    try {
+      await ensureCsrf();
+      const res = await axios.get(`${API_ROOT}/orders/${id}/`, { withCredentials: true });
+      setOrder(res.data);
+    } catch (err) {
+      window.lastAxiosError = err;
+      console.warn("Failed to load order details for modal:", err?.response?.data ?? err?.message);
+    } finally {
+      setModalLoading(false);
     }
   }
 
-  // derive order number string (format like #Bh2300006 in your example) — you can customize
   const orderNumber = order ? `#Bh${String(order.id).padStart(7, "0")}` : `#Bh${String(id || "").padStart(7, "0")}`;
 
   return (
@@ -139,7 +188,7 @@ export default function OrderConfirmation() {
             <DecorativeTick size={140} />
           </div>
 
-          <h1 className="text-2xl md:text-3xl font-serif font-semibold mb-2">Thankyou for your ordering</h1>
+          <h1 className="text-2xl md:text-3xl font-serif font-semibold mb-2">Thank you for your order</h1>
 
           <p className="text-sm text-gray-700 mb-4">
             We’ve received your order and it will ship in 5-7 business days.
@@ -156,15 +205,19 @@ export default function OrderConfirmation() {
             </button>
 
             <button
-              onClick={() => {
-                // placeholder: you can route to a tracking page or external provider
-                navigate("/track-order/" + id);
-              }}
+              onClick={() => navigate("/tracking/" + id)}
               className="px-6 py-3 rounded-md bg-[#274541] text-white text-lg font-medium hover:opacity-95"
             >
               Track Order
             </button>
           </div>
+
+          {error && (
+            <div className="mt-4 text-sm text-red-600">
+              <strong>Error:</strong> {String(error)}
+              <div className="text-xs text-gray-500 mt-1">Open DevTools → Console/Network for details (window.lastAxiosError).</div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -180,7 +233,7 @@ export default function OrderConfirmation() {
 
             <div className="flex justify-between">
               <div><strong>Placed</strong></div>
-              <div>{new Date(order.created).toLocaleString()}</div>
+              <div>{order.created ? new Date(order.created).toLocaleString() : "—"}</div>
             </div>
 
             <div className="flex justify-between">
@@ -190,7 +243,7 @@ export default function OrderConfirmation() {
 
             <div>
               <strong>Shipping Address</strong>
-              <div className="mt-1">{order.shipping_address}</div>
+              <div className="mt-1">{order.shipping_address || "—"}</div>
             </div>
 
             <div>
@@ -212,7 +265,7 @@ export default function OrderConfirmation() {
 
             <div className="flex justify-between pt-2 border-t">
               <div><strong>Total</strong></div>
-              <div className="font-semibold">₹ {Number(order.total_amount).toFixed(2)}</div>
+              <div className="font-semibold">₹ {order.total_amount ? Number(order.total_amount).toFixed(2) : "—"}</div>
             </div>
 
             <div className="flex gap-3 justify-end pt-4">

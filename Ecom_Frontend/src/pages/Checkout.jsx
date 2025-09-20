@@ -429,10 +429,6 @@ export default function Checkout() {
                 </label>
               </div>
             </div>
-
-            <div className="text-xs text-gray-600 mt-2">
-              <strong>Security note:</strong> Do not store raw card numbers or CVV in production — use a PCI-compliant gateway.
-            </div>
           </div>
 
           {/* Shipping Address */}

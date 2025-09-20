@@ -236,7 +236,7 @@ export default function Navbar({ cartCount: cartCountProp = null }) {
                     </button>
                     {dropdownOpen && (
                       <div className="absolute right-0 mt-2 w-40 bg-white rounded shadow-md z-30 text-sm">
-                        <Link to="/account" className="block px-4 py-2 hover:bg-gray-100 text-gray-800">Account</Link>
+                        {/* <Link to="/tracking/:id" className="block px-4 py-2 hover:bg-gray-100 text-gray-800">Track Your Order</Link> */}
                         <button onClick={handleLogout} className="w-full text-left px-4 py-2 hover:bg-gray-100 text-gray-800">Logout</button>
                       </div>
                     )}

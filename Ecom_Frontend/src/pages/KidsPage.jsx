@@ -1,5 +1,7 @@
+
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
+
 import FiltersPanel from "../components/FiltersPanel";
 import ProductCard from "../components/ProductCard";
 import cartService from "../api/cartService";
@@ -7,7 +9,7 @@ import cartService from "../api/cartService";
 const API_ROOT =
   typeof import.meta !== "undefined" ? import.meta.env.VITE_API_URL || "" : "";
 
-export default function WomensPage() {
+export default function KidsPage() {
   const PAGE_SIZE = 12;
 
   const [products, setProducts] = useState([]);
@@ -86,7 +88,7 @@ export default function WomensPage() {
   const buildParams = useCallback(
     (useOffset = 0) => {
       const params = {
-        category: "womens",
+        category: "kids",
         limit: PAGE_SIZE,
         offset: useOffset,
       };
@@ -124,7 +126,7 @@ export default function WomensPage() {
       setError(null);
       const url = `${normalizedApi}/filters/`;
       const res = await axios.get(url, {
-        params: { category: "womens" },
+        params: { category: "kids" },
         timeout: 10000,
       });
       if (res?.data) {
@@ -349,7 +351,6 @@ export default function WomensPage() {
   // ----- Render -----
   return (
     <div>
-    
 
       <main className="max-w-screen-2xl mx-auto px-6 py-8">
         <div className="flex flex-col lg:flex-row gap-6 items-start">
@@ -362,7 +363,7 @@ export default function WomensPage() {
                 aria-expanded={showFilters}
                 aria-pressed={showFilters}
               >
-                <span className="text-xl font-serif">Filters</span>
+                <span className="text-lg font-serif">Filters</span>
                 <span className="text-lg">{showFilters ? "←" : "→"}</span>
               </button>
 
@@ -420,7 +421,9 @@ export default function WomensPage() {
               <ProductCard
                 key={p.id}
                 product={p}
+                // pass cart handlers to ProductCard so its Add to Cart uses server-side API
                 onAddToCart={async (payload) => {
+                  // ProductCard might send { productId, qty, size } or { productId, quantity, size }
                   const productId = payload.productId ?? payload.product_id ?? p.id;
                   const quantity = payload.qty ?? payload.quantity ?? 1;
                   const size = payload.size ?? "";
