@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
+import giftImg from "../assets/images/gift.png";
+import offerImg from "../assets/images/offer.png";
 
 import "swiper/css";
 import "swiper/css/pagination";
@@ -23,17 +25,18 @@ const Home = () => {
   const [overview, setOverview] = useState(null);
   const [categories, setCategories] = useState([]);
   const [messageIndex, setMessageIndex] = useState(0);
-
-  const messages = [
-    {
-      text: "🎁 Get your first order with free gift 🎁 & 50 % offer 💥",
-      className: "text-white bg-[#2F4F4F] border border-black p-4",
-    },
-    {
-      text: "🎁 Get your first order with free gift 🎁 & 50 % offer 💥",
-      className: "text-black bg-white border border-black p-4",
-    },
-  ];
+const messages = [
+  {
+    text: " Get your first order with free gift",
+    text1: "& 50 % offer ",
+    className: "text-white bg-[#2F4F4F] border border-black p-4 text-lg",
+  },
+  {
+    text: " Get your first order with free gift",
+    text1: "& 50 % offer ",
+    className: "text-black bg-white border border-black p-4 text-lg",
+  },
+];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -176,20 +179,34 @@ const Home = () => {
 
       <NewTrending />
 
-      <div className="relative h-[60px] flex justify-center items-center overflow-hidden">
-        {messages.map((msg, idx) => (
-          <p
-            key={idx}
-            className={`${
-              msg.className
-            } absolute w-full text-center transition-opacity duration-700 ${
-              idx === messageIndex ? "opacity-100" : "opacity-0"
-            }`}
-          >
-            {msg.text}
-          </p>
-        ))}
-      </div>
+       <div className="relative h-[60px] flex justify-center items-center overflow-hidden">
+      {messages.map((msg, idx) => (
+        <p
+          key={idx}
+          className={`${msg.className} absolute w-full text-center transition-opacity duration-700 ${
+            idx === messageIndex ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <img
+            src={giftImg}
+            alt="gift"
+            className="inline-block w-8 h-8 mx-1"
+          />
+          {msg.text}
+          <img
+            src={giftImg}
+            alt="gift"
+            className="inline-block w-8 h-8 mx-1"
+          />
+           {msg.text1}
+          <img
+            src={offerImg}
+            alt="offer"
+            className="inline-block w-8 h-8 mx-1"
+          />
+        </p>
+      ))}
+    </div>
     </div>
   );
 };
