@@ -8,7 +8,7 @@ import cartService from "../api/cartService";
 import lock from "../assets/images/lock.png";
 import CartHeader from "../components/CartHeader";
 
-const API_ROOT = (import.meta.env?.VITE_API_URL || "http://127.0.0.1:8000/api").replace(/\/+$/, "");
+const API_ROOT = (import.meta.env?.VITE_API_URL || "https://django-4hm5.onrender.com/api").replace(/\/+$/, "");
 
 // Ensure axios sends cookies for session auth
 axios.defaults.withCredentials = true;
@@ -433,3 +433,4 @@ export default function Cart() {
     </div>
   );
 }
+
