@@ -9,6 +9,8 @@ from rest_framework.views import APIView
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.exceptions import NotFound, PermissionDenied
 from django.db.models import Q
+from rest_framework import serializers
+
 
 from .models import (
     Navbar, Product, Brand, Color, Size,
@@ -308,6 +310,34 @@ class CartViewSet(viewsets.GenericViewSet,
 
         serializer = self.get_serializer(cart)
         return Response(serializer.data)
+        
+    def update(self, request, *args, **kwargs):
+        cart = self.get_object()
+        data = request.data.copy() if isinstance(request.data, dict) else request.data
+
+        logger.debug("[CartViewSet.update] data for update: %s", data)
+
+        # Ensure `items` is present and properly formatted (list of dicts with product_id or product keys)
+        items = data.get("items", None)
+        if items is None:
+            return Response({"detail": "No items provided"}, status=status.HTTP_400_BAD_REQUEST)
+        if not isinstance(items, list):
+            return Response({"detail": "items must be a list"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Use the CartSerializer.update explicitly (so nested logic runs exactly as defined)
+        serializer = self.get_serializer(cart, data=data, partial=False)
+        try:
+            serializer.is_valid(raise_exception=True)
+            updated = serializer.save()
+            out = self.get_serializer(updated).data
+            return Response(out, status=status.HTTP_200_OK)
+        except serializers.ValidationError as ve:
+            logger.debug("[CartViewSet.update] validation errors: %s", ve.detail)
+            return Response({"detail": "validation_error", "errors": ve.detail}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as exc:
+            logger.exception("Cart update save failed")
+            return Response({"detail": "update_failed", "error": str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
     @action(detail=True, methods=["post"], url_path="remove_item")
     def remove_item(self, request, pk=None):
@@ -404,3 +434,4 @@ class OrderCreateAPIView(CreateAPIView):
         except Exception as exc:
             logger.exception("Error creating order")
             return Response({"detail": str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
