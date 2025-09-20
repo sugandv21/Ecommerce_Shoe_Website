@@ -18,7 +18,6 @@ import AuthPage from "./pages/AuthPage";
 import TrackingPage from "./pages/TrackingPage";
 import InsideNavbar from "./components/InsideNavbar";
 
-import ProtectedRoute from "./components/ProtectedRoute";
 import Footer from "./components/Footer";
 import Blog from "./pages/Blog";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -57,45 +56,16 @@ function App() {
             <Route path="/blogs" element={<Blog />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/shipping" element={<ShippingPolicy />} />
-            
+
             <Route path="/termss" element={<TermsOfExchange />} />
             <Route path="/terms" element={<TermsofService />} />
-            
             <Route path="/return" element={<ReturnAndExchangePolicy />} />
 
-            <Route
-              path="/order-confirmation/:id"
-              element={
-                <ProtectedRoute>
-                  <OrderConfirmation />
-                </ProtectedRoute>
-              }
-            />
-            
-            <Route
-              path="/track-order/:id"
-              element={
-                <ProtectedRoute>
-                  <TrackingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/order-tracking/:id"
-              element={
-                <ProtectedRoute>
-                  <TrackingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/tracking/:id"
-              element={
-                <ProtectedRoute>
-                  <TrackingPage />
-                </ProtectedRoute>
-              }
-            />
+            {/* Direct access without ProtectedRoute */}
+            <Route path="/order-confirmation/:id" element={<OrderConfirmation />} />
+            <Route path="/track-order/:id" element={<TrackingPage />} />
+            <Route path="/order-tracking/:id" element={<TrackingPage />} />
+            <Route path="/tracking/:id" element={<TrackingPage />} />
 
             <Route path="/auth" element={<AuthPage />} />
           </Routes>
