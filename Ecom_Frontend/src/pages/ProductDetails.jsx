@@ -12,7 +12,6 @@ import payUpi from "../assets/images/upi.webp";
 import whatsappImg from "../assets/images/whatsapp.png";
 import placeholder from "../assets/images/lock.png";
 import Reviews from "../components/ReviewCard";
-import AuthPage from "../pages/AuthPage";
 
 axios.defaults.withCredentials = true;
 
@@ -41,34 +40,13 @@ function RatingStars({ rating = 0 }) {
   );
 }
 
-function InfoModal({ open, onClose, onContinue, message }) {
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md">
-        <div className="text-lg font-semibold mb-3">Continue to Checkout</div>
-        <div className="text-sm text-gray-700 mb-6">{message}</div>
-
-        <div className="flex justify-end gap-3">
-          <button onClick={onClose} className="px-4 py-2 rounded border">
-            Cancel
-          </button>
-          <button onClick={onContinue} className="px-4 py-2 rounded bg-[#2f4f4f] text-white">
-            Continue
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function ProductDetail() {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
-  const [images, setImages] = useState([]); 
+  const [images, setImages] = useState([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [size, setSize] = useState("");
   const [qty, setQty] = useState(1);
@@ -76,12 +54,6 @@ export default function ProductDetail() {
   const [message, setMessage] = useState(null);
 
   const [selectedColor, setSelectedColor] = useState(null);
-
-  const [user, setUser] = useState(null);
-  const [checkingAuth, setCheckingAuth] = useState(true);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [infoModalOpen, setInfoModalOpen] = useState(false);
-  const pendingBuyRef = useRef(null);
 
   const placeholderSrc = (placeholder && (placeholder.default || placeholder)) || "";
   const API_ROOT = (import.meta.env?.VITE_API_URL || "http://127.0.0.1:8000/api").replace(/\/+$/, "");
@@ -93,6 +65,7 @@ export default function ProductDetail() {
       if (location.state.color) setSelectedColor(location.state.color);
     }
   }, [location]);
+
   function getImageUrl(entry) {
     if (!entry) return "";
     if (typeof entry === "string") return entry;
@@ -127,14 +100,13 @@ export default function ProductDetail() {
 
   async function resolveValidUrls(rawArr = []) {
     const candidates = Array.isArray(rawArr) ? rawArr.map(getImageUrl).filter(Boolean) : [];
-    const unique = Array.from(new Set(candidates)); 
+    const unique = Array.from(new Set(candidates));
     if (unique.length === 0) return [];
 
     const results = await Promise.all(unique.map((u) => preloadUrl(u)));
     const ok = results.filter(Boolean);
     return ok;
   }
-
 
   async function buildSixImages(p) {
     const tryArr = Array.isArray(p.images) && p.images.length > 0 ? p.images : (Array.isArray(p.variant_thumbs) ? p.variant_thumbs : []);
@@ -172,7 +144,7 @@ export default function ProductDetail() {
           if (!cancelled) {
             setImages(finalImages);
             setSelectedImageIndex((prev) => (prev >= finalImages.length ? 0 : prev));
-            console.log("finalImages:", finalImages);
+            // console.log("finalImages:", finalImages);
           }
         } catch (err) {
           console.error("Error building images:", err);
@@ -191,7 +163,6 @@ export default function ProductDetail() {
           const firstColor = p.colors[0];
           const colorValue = typeof firstColor === "string" ? firstColor : (firstColor.hex ?? firstColor.value ?? firstColor.name ?? "");
           setSelectedColor({ raw: firstColor, value: colorValue, label: (firstColor.name ?? colorValue) });
-        } else if (location?.state?.color) {
         }
       } catch (err) {
         console.error("Failed to load product", err);
@@ -204,41 +175,6 @@ export default function ProductDetail() {
     };
   }, [id, API_ROOT, location, placeholderSrc]);
 
-  useEffect(() => {
-    let mounted = true;
-    const fetchMe = async () => {
-      setCheckingAuth(true);
-      try {
-        const res = await axios.get(`${API_ROOT}/auth/me/`);
-        if (!mounted) return;
-        setUser(res?.data ?? null);
-      } catch (err) {
-        if (!mounted) return;
-        setUser(null);
-      } finally {
-        if (mounted) setCheckingAuth(false);
-      }
-    };
-    fetchMe();
-
-    const onAuthUpdated = () => {
-      fetchMe();
-      const payload = pendingBuyRef.current;
-      if (authModalOpen && payload) {
-        setAuthModalOpen(false);
-        pendingBuyRef.current = null;
-        navigate("/checkout", { state: { fromBuyNow: true, item: payload } });
-      }
-    };
-
-    window.addEventListener("authUpdated", onAuthUpdated);
-    return () => {
-      mounted = false;
-      window.removeEventListener("authUpdated", onAuthUpdated);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [API_ROOT, authModalOpen]);
-
   const sizeOptions = useMemo(() => {
     if (!product?.sizes || product.sizes.length === 0) return [];
     return product.sizes.map((s) => {
@@ -247,7 +183,6 @@ export default function ProductDetail() {
     });
   }, [product]);
 
-  // When a user clicks a color swatch, update selectedColor state
   const onSelectColor = (c) => {
     if (!c) return;
     const value = typeof c === "string" ? c : (c.hex ?? c.value ?? "");
@@ -308,37 +243,16 @@ export default function ProductDetail() {
       product_id: product.id,
       quantity: Number(qty),
       size: size || "",
-      color: selectedColor?.value ?? null, // include color so checkout can pick it up
+      color: selectedColor?.value ?? null,
     };
 
-    if (!user) {
-      pendingBuyRef.current = itemPayload;
-      setInfoModalOpen(true);
-      return;
-    }
-
+    // Directly navigate to checkout — no login gating
     navigate("/checkout", {
       state: {
         fromBuyNow: true,
         item: itemPayload,
       },
     });
-  }
-
-  function onInfoContinue() {
-    setInfoModalOpen(false);
-    setAuthModalOpen(true);
-    navigate("/auth", { state: { modal: true } });
-  }
-
-  function closeAuthModal() {
-    setAuthModalOpen(false);
-    pendingBuyRef.current = null;
-    try {
-      navigate(-1);
-    } catch (e) {
-      navigate(`/products/${id}`);
-    }
   }
 
   if (!product) {
@@ -403,7 +317,6 @@ export default function ProductDetail() {
             </div>
           </div>
 
-          {/* Colors: interactive swatches */}
           {product.colors && product.colors.length > 0 && (
             <div className="mt-4">
               <div className="text-sm font-medium">Color</div>
@@ -419,11 +332,10 @@ export default function ProductDetail() {
                       key={idx}
                       onClick={() => onSelectColor(raw)}
                       title={label}
-                      className={`w-8 h-8 rounded-full border flex items-center justify-center focus:outline-none `}
+                      className={`w-8 h-8 rounded-full border flex items-center justify-center focus:outline-none ${isSel ? "ring-2 ring-offset-1 ring-gray-400" : ""}`}
                       aria-pressed={isSel}
                       style={{ backgroundColor: value || "transparent" }}
                     >
-                      {/* if swatch is empty (string empty), show small border dot */}
                       {!value && <div className="w-2 h-2 bg-gray-400 rounded-full" />}
                     </button>
                   );
@@ -432,7 +344,6 @@ export default function ProductDetail() {
             </div>
           )}
 
-          {/* Shoe Size buttons */}
           {sizeOptions.length > 0 && (
             <div className="mt-4">
               <div className="text-sm font-medium">Shoe Size</div>
@@ -451,11 +362,9 @@ export default function ProductDetail() {
             </div>
           )}
 
-          {/* NEW: Selected summary row (color swatch + color label + size) shown above Quantity */}
           <div className="mt-4">
             <div className="text-sm font-medium">Selected</div>
             <div className="flex items-center gap-3 mt-2 text-sm">
-              {/* show selected color swatch and label */}
               {selectedColor ? (
                 <div className="flex items-center gap-2">
                   <span
@@ -471,14 +380,12 @@ export default function ProductDetail() {
 
               <span className="text-gray-400">•</span>
 
-              {/* show selected size */}
               <div>
                 {size ? <span className="text-gray-700">Size: {size}</span> : <span className="text-gray-500">No size selected</span>}
               </div>
             </div>
           </div>
 
-          {/* Quantity controls (now below Selected summary) */}
           <div className="mt-4">
             <div className="text-sm font-medium">Quantity</div>
             <div className="mt-4">
@@ -590,32 +497,9 @@ export default function ProductDetail() {
         <Reviews />
       </div>
 
-      <InfoModal
-        open={infoModalOpen}
-        onClose={() => setInfoModalOpen(false)}
-        onContinue={onInfoContinue}
-        message="You will be asked to log in to complete checkout."
-      />
-
-      {authModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-12 bg-black/50">
-          <div className="w-full max-w-3xl bg-transparent p-4">
-            <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
-              <div className="flex items-center justify-end p-3">
-                <button
-                  onClick={closeAuthModal}
-                  className="text-gray-600 px-3 py-1 rounded hover:bg-gray-100"
-                  aria-label="Close"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="p-6">
-                <AuthPage />
-              </div>
-            </div>
-          </div>
+      {message && (
+        <div className="fixed bottom-6 right-6 bg-white border p-3 rounded shadow">
+          <div className="text-sm">{message}</div>
         </div>
       )}
     </div>
