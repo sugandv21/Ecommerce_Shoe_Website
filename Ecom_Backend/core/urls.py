@@ -18,15 +18,14 @@ router.register(r"products", ProductViewSet, basename="product")
 router.register(r"cart", CartViewSet, basename="cart")
 router.register(r"cart-items", CartItemViewSet, basename="cart-item")
 from .views import OrderTrackingAPIView
-path("orders/<int:pk>/tracking/", OrderTrackingAPIView.as_view(), name="order-tracking"),
 
 urlpatterns = [
     path("orders/", OrderCreateAPIView.as_view(), name="orders-create"),
     path("orders/<int:pk>/", OrderDetailAPIView.as_view(), name="order-detail"),
     path("filters/", FiltersForCategory.as_view(), name="filters"),
     path("navbar/", NavbarDetail.as_view(), name="navbar"),
-    path("checkout-details/", UserCheckoutDetailCreateAPIView.as_view(), name="checkout-details"),
-
+    path("checkout-details/", UserCheckoutDetailCreateAPIView.as_view(), name="checkout-details"), 
+    path("orders/<int:pk>/tracking/", OrderTrackingAPIView.as_view(), name="order-tracking"),
     # auth endpoints
     path("auth/csrf/", csrf, name="auth-csrf"),
     path("auth/register/", RegisterAPIView.as_view(), name="auth-register"),

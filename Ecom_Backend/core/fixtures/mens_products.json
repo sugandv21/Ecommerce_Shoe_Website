@@ -1,0 +1,265 @@
+[
+  {
+    "model": "core.brand",
+    "pk": 7,
+    "fields": { "name": "Comfy Steps", "slug": "comfy-steps" }
+  },
+  {
+    "model": "core.brand",
+    "pk": 8,
+    "fields": { "name": "XL", "slug": "xl" }
+  },
+  {
+    "model": "core.brand",
+    "pk": 9,
+    "fields": { "name": "Oaga", "slug": "oaga" }
+  },
+  {
+    "model": "core.brand",
+    "pk": 10,
+    "fields": { "name": "Marco", "slug": "marco" }
+  },
+  {
+    "model": "core.brand",
+    "pk": 11,
+    "fields": { "name": "Urban Territory", "slug": "urban-territory" }
+  },
+  {
+    "model": "core.brand",
+    "pk": 12,
+    "fields": { "name": "Hoffz", "slug": "hoffz" }
+  },
+
+  {
+    "model": "core.product",
+    "pk": 51,
+    "fields": {
+      "title": "Comfy Steps",
+      "subtitle": "Harlan Men's Tan Boat Shoe",
+      "slug": "comfy-steps-harlan-boat-shoe",
+      "price": "2799.00",
+      "mrp": "2799.00",
+      "description": "Tan leather boat shoe with cushioned sole.",
+      "category": "mens",
+      "style": "Boat Shoe",
+      "brand": 7,
+      "sizes": [4,5,6],
+      "colors": [3,1],
+      "rating": 4.7,
+      "is_active": true,
+      "created": "2025-09-19T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 52,
+    "fields": {
+      "title": "XL",
+      "subtitle": "Men's Lace Up Trainer",
+      "slug": "xl-mens-trainer",
+      "price": "3199.00",
+      "mrp": "3199.00",
+      "description": "Classic black and white lace-up trainer.",
+      "category": "mens",
+      "style": "Trainers",
+      "brand": 8,
+      "sizes": [4,5,6],
+      "colors": [1,2],
+      "rating": 4.5,
+      "is_active": true,
+      "created": "2025-09-19T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 53,
+    "fields": {
+      "title": "Comfy Steps",
+      "subtitle": "Double Strap Sandals",
+      "slug": "comfy-steps-double-strap",
+      "price": "1999.00",
+      "mrp": "1999.00",
+      "description": "Casual brown strap sandals.",
+      "category": "mens",
+      "style": "Sandals",
+      "brand": 7,
+      "sizes": [4,5,6],
+      "colors": [3,1],
+      "rating": 4.2,
+      "is_active": true,
+      "created": "2025-09-19T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 54,
+    "fields": {
+      "title": "Oaga",
+      "subtitle": "Blue Mesh Running Shoes",
+      "slug": "oaga-mesh-running",
+      "price": "2499.00",
+      "mrp": "2499.00",
+      "description": "Breathable mesh running shoes for men.",
+      "category": "mens",
+      "style": "Running",
+      "brand": 9,
+      "sizes": [4,5,6],
+      "colors": [4,7],
+      "rating": 4.3,
+      "is_active": true,
+      "created": "2025-09-19T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 55,
+    "fields": {
+      "title": "Marco",
+      "subtitle": "Leather Lace-up Formal",
+      "slug": "marco-leather-laceup",
+      "price": "3599.00",
+      "mrp": "3599.00",
+      "description": "Classic leather lace-up formal shoes.",
+      "category": "mens",
+      "style": "Formal",
+      "brand": 10,
+      "sizes": [4,5,6],
+      "colors": [3,1],
+      "rating": 4.6,
+      "is_active": true,
+      "created": "2025-09-19T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 56,
+    "fields": {
+      "title": "Urban Territory",
+      "subtitle": "High-top Sneakers",
+      "slug": "urban-territory-hightop",
+      "price": "3999.00",
+      "mrp": "3999.00",
+      "description": "Stylish black high-top sneakers for casual wear.",
+      "category": "mens",
+      "style": "Sneakers",
+      "brand": 11,
+      "sizes": [4,5,6],
+      "colors": [1,7],
+      "rating": 4.4,
+      "is_active": true,
+      "created": "2025-09-19T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 57,
+    "fields": {
+      "title": "Urban Territory",
+      "subtitle": "Tan Outdoor Boots",
+      "slug": "urban-territory-tan-boot",
+      "price": "4299.00",
+      "mrp": "4299.00",
+      "description": "Durable tan boots for outdoor adventure.",
+      "category": "mens",
+      "style": "Boots",
+      "brand": 11,
+      "sizes": [4,5,6],
+      "colors": [3,7],
+      "rating": 4.5,
+      "is_active": true,
+      "created": "2025-09-19T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 58,
+    "fields": {
+      "title": "Leather",
+      "subtitle": "Black Formal Sandals",
+      "slug": "leather-formal-sandals",
+      "price": "2299.00",
+      "mrp": "2299.00",
+      "description": "Elegant formal sandals in black leather.",
+      "category": "mens",
+      "style": "Sandals",
+      "brand": 10,
+      "sizes": [4,5,6],
+      "colors": [1],
+      "rating": 4.0,
+      "is_active": true,
+      "created": "2025-09-19T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 59,
+    "fields": {
+      "title": "Hoffz",
+      "subtitle": "Hand Painted Tan Loafers",
+      "slug": "hoffz-handpainted-loafers",
+      "price": "3799.00",
+      "mrp": "3799.00",
+      "description": "Premium hand painted tan loafers.",
+      "category": "mens",
+      "style": "Loafers",
+      "brand": 12,
+      "sizes": [4,5,6],
+      "colors": [3],
+      "rating": 4.8,
+      "is_active": true,
+      "created": "2025-09-19T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 60,
+    "fields": {
+      "title": "Lomas",
+      "subtitle": "Luxury Leather Loafers",
+      "slug": "lomas-leather-loafers",
+      "price": "4499.00",
+      "mrp": "4499.00",
+      "description": "Luxury leather loafers in premium black finish.",
+      "category": "mens",
+      "style": "Loafers",
+      "brand": 12,
+      "sizes": [4,5,6],
+      "colors": [1],
+      "rating": 4.9,
+      "is_active": true,
+      "created": "2025-09-19T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 61,
+    "fields": {
+      "title": "Lomas",
+      "subtitle": "Tan Leather Formal Loafers",
+      "slug": "lomas-tan-formal-loafers",
+      "price": "4599.00",
+      "mrp": "4599.00",
+      "description": "Formal tan loafers with stitched detail.",
+      "category": "mens",
+      "style": "Loafers",
+      "brand": 12,
+      "sizes": [4,5,6],
+      "colors": [3],
+      "rating": 4.7,
+      "is_active": true,
+      "created": "2025-09-19T00:00:00Z"
+    }
+  },
+
+  { "model": "core.productimage", "pk": 51, "fields": { "product": 51, "image": "products/mens_51.jpg", "alt_text": "Comfy Steps Tan Boat Shoe", "order": 0 } },
+  { "model": "core.productimage", "pk": 52, "fields": { "product": 52, "image": "products/mens_52.jpg", "alt_text": "XL Trainer", "order": 0 } },
+  { "model": "core.productimage", "pk": 53, "fields": { "product": 53, "image": "products/mens_53.jpg", "alt_text": "Comfy Steps Strap Sandals", "order": 0 } },
+  { "model": "core.productimage", "pk": 54, "fields": { "product": 54, "image": "products/mens_54.jpg", "alt_text": "Oaga Blue Mesh Shoes", "order": 0 } },
+  { "model": "core.productimage", "pk": 55, "fields": { "product": 55, "image": "products/mens_55.jpg", "alt_text": "Marco Leather Formal", "order": 0 } },
+  { "model": "core.productimage", "pk": 56, "fields": { "product": 56, "image": "products/mens_56.jpg", "alt_text": "Urban Territory Sneakers", "order": 0 } },
+  { "model": "core.productimage", "pk": 57, "fields": { "product": 57, "image": "products/mens_57.jpg", "alt_text": "Urban Territory Tan Boots", "order": 0 } },
+  { "model": "core.productimage", "pk": 58, "fields": { "product": 58, "image": "products/mens_58.jpg", "alt_text": "Leather Formal Sandals", "order": 0 } },
+  { "model": "core.productimage", "pk": 59, "fields": { "product": 59, "image": "products/mens_59.jpg", "alt_text": "Hoffz Tan Loafers", "order": 0 } },
+  { "model": "core.productimage", "pk": 60, "fields": { "product": 60, "image": "products/mens_60.jpg", "alt_text": "Lomas Luxury Loafers", "order": 0 } },
+  { "model": "core.productimage", "pk": 61, "fields": { "product": 61, "image": "products/mens_61.jpg", "alt_text": "Lomas Tan Formal Loafers", "order": 0 } }
+]

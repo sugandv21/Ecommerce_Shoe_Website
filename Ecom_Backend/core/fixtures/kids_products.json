@@ -1,0 +1,262 @@
+[
+  { "model": "core.brand", "pk": 13, "fields": { "name": "Walkright", "slug": "walkright" } },
+  { "model": "core.brand", "pk": 14, "fields": { "name": "Mini Slipper Company", "slug": "mini-slipper-company" } },
+  { "model": "core.brand", "pk": 15, "fields": { "name": "LOL", "slug": "lol" } },
+  { "model": "core.brand", "pk": 16, "fields": { "name": "Disney", "slug": "disney" } },
+  { "model": "core.brand", "pk": 17, "fields": { "name": "Spider-Man", "slug": "spider-man" } },
+  { "model": "core.brand", "pk": 18, "fields": { "name": "Shoezone", "slug": "shoezone-kids" } },
+
+  {
+    "model": "core.product",
+    "pk": 101,
+    "fields": {
+      "title": "Walkright",
+      "subtitle": "Girls White Multi Sandals",
+      "slug": "walkright-girls-white-multi-sandal",
+      "price": "1799.00",
+      "mrp": "1799.00",
+      "description": "Girls white multi sandal with cushioned sole.",
+      "category": "kids",
+      "style": "Sandals",
+      "brand": 13,
+      "sizes": [1,2,3],
+      "colors": [2,8],
+      "rating": 4.6,
+      "is_active": true,
+      "created": "2025-09-19T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 102,
+    "fields": {
+      "title": "Walkright",
+      "subtitle": "Girls Canvas Trainers",
+      "slug": "walkright-girls-canvas-trainer",
+      "price": "1899.00",
+      "mrp": "1899.00",
+      "description": "Cute and colorful trainers for girls.",
+      "category": "kids",
+      "style": "Trainers",
+      "brand": 13,
+      "sizes": [1,2,3],
+      "colors": [4,6,8],
+      "rating": 4.3,
+      "is_active": true,
+      "created": "2025-09-19T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 103,
+    "fields": {
+      "title": "Walkright",
+      "subtitle": "Girls Pink PU Shoes",
+      "slug": "walkright-girls-pink-pu-shoes",
+      "price": "1699.00",
+      "mrp": "1699.00",
+      "description": "Pretty pink PU shoes for everyday wear.",
+      "category": "kids",
+      "style": "Shoes",
+      "brand": 13,
+      "sizes": [1,2,3],
+      "colors": [6,8],
+      "rating": 4.5,
+      "is_active": true,
+      "created": "2025-09-19T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 104,
+    "fields": {
+      "title": "Walkright",
+      "subtitle": "Girls White Silver Sandals",
+      "slug": "walkright-girls-white-silver-sandals",
+      "price": "1799.00",
+      "mrp": "1799.00",
+      "description": "White silver sandal for little girls.",
+      "category": "kids",
+      "style": "Sandals",
+      "brand": 13,
+      "sizes": [1,2,3],
+      "colors": [2,7],
+      "rating": 4.4,
+      "is_active": true,
+      "created": "2025-09-19T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 105,
+    "fields": {
+      "title": "Mini Slipper Company",
+      "subtitle": "Girls Pink Slippers",
+      "slug": "mini-slipper-company-pink-slippers",
+      "price": "1299.00",
+      "mrp": "1299.00",
+      "description": "Soft warm slippers for kids.",
+      "category": "kids",
+      "style": "Slippers",
+      "brand": 14,
+      "sizes": [1,2],
+      "colors": [6,8],
+      "rating": 4.2,
+      "is_active": true,
+      "created": "2025-09-19T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 106,
+    "fields": {
+      "title": "LOL",
+      "subtitle": "Kids Character Slipper",
+      "slug": "lol-kids-character-slipper",
+      "price": "1499.00",
+      "mrp": "1499.00",
+      "description": "LOL kids character slipper.",
+      "category": "kids",
+      "style": "Slippers",
+      "brand": 15,
+      "sizes": [1,2],
+      "colors": [6,8],
+      "rating": 4.1,
+      "is_active": true,
+      "created": "2025-09-19T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 107,
+    "fields": {
+      "title": "Ebay",
+      "subtitle": "Boys White Trainers",
+      "slug": "ebay-boys-white-trainers",
+      "price": "1999.00",
+      "mrp": "1999.00",
+      "description": "Classic white trainer for boys.",
+      "category": "kids",
+      "style": "Trainers",
+      "brand": 16,
+      "sizes": [1,2,3],
+      "colors": [2,1],
+      "rating": 4.3,
+      "is_active": true,
+      "created": "2025-09-19T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 108,
+    "fields": {
+      "title": "Spider-Man",
+      "subtitle": "Kids Red Lace-up Trainers",
+      "slug": "spiderman-kids-red-trainers",
+      "price": "2099.00",
+      "mrp": "2099.00",
+      "description": "Red lace-up trainers with Spider-Man theme.",
+      "category": "kids",
+      "style": "Trainers",
+      "brand": 17,
+      "sizes": [1,2,3],
+      "colors": [6,1],
+      "rating": 4.7,
+      "is_active": true,
+      "created": "2025-09-19T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 109,
+    "fields": {
+      "title": "Disney",
+      "subtitle": "Kids Light-up Sandals",
+      "slug": "disney-kids-lightup-sandals",
+      "price": "1899.00",
+      "mrp": "1899.00",
+      "description": "Fun sandals with light-up soles.",
+      "category": "kids",
+      "style": "Sandals",
+      "brand": 16,
+      "sizes": [1,2,3],
+      "colors": [8,4],
+      "rating": 4.6,
+      "is_active": true,
+      "created": "2025-09-19T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 110,
+    "fields": {
+      "title": "Disney",
+      "subtitle": "Princess Sandals with Lights",
+      "slug": "disney-princess-lightup-sandals",
+      "price": "1999.00",
+      "mrp": "1999.00",
+      "description": "Disney princess sandals with lights.",
+      "category": "kids",
+      "style": "Sandals",
+      "brand": 16,
+      "sizes": [1,2,3],
+      "colors": [8,6],
+      "rating": 4.5,
+      "is_active": true,
+      "created": "2025-09-19T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 111,
+    "fields": {
+      "title": "Shoezone",
+      "subtitle": "Kids Black Wellington Boots",
+      "slug": "shoezone-kids-black-wellies",
+      "price": "1699.00",
+      "mrp": "1699.00",
+      "description": "Durable black wellington boots for kids.",
+      "category": "kids",
+      "style": "Boots",
+      "brand": 18,
+      "sizes": [6,7],
+      "colors": [1],
+      "rating": 4.4,
+      "is_active": true,
+      "created": "2025-09-19T00:00:00Z"
+    }
+  },
+  {
+    "model": "core.product",
+    "pk": 112,
+    "fields": {
+      "title": "Shoezone",
+      "subtitle": "Kids Purple Glitter Boots",
+      "slug": "shoezone-kids-purple-glitter-boots",
+      "price": "1799.00",
+      "mrp": "1799.00",
+      "description": "Purple glitter wellies for kids.",
+      "category": "kids",
+      "style": "Boots",
+      "brand": 18,
+      "sizes": [6,7],
+      "colors": [8,6],
+      "rating": 4.5,
+      "is_active": true,
+      "created": "2025-09-19T00:00:00Z"
+    }
+  },
+
+  { "model": "core.productimage", "pk": 101, "fields": { "product": 101, "image": "products/kids_101.jpg", "alt_text": "Walkright Girls White Multi Sandal", "order": 0 } },
+  { "model": "core.productimage", "pk": 102, "fields": { "product": 102, "image": "products/kids_102.jpg", "alt_text": "Walkright Girls Canvas Trainers", "order": 0 } },
+  { "model": "core.productimage", "pk": 103, "fields": { "product": 103, "image": "products/kids_103.jpg", "alt_text": "Walkright Girls Pink PU Shoes", "order": 0 } },
+  { "model": "core.productimage", "pk": 104, "fields": { "product": 104, "image": "products/kids_104.jpg", "alt_text": "Walkright Girls White Silver Sandals", "order": 0 } },
+  { "model": "core.productimage", "pk": 105, "fields": { "product": 105, "image": "products/kids_105.jpg", "alt_text": "Mini Slipper Company Pink Slippers", "order": 0 } },
+  { "model": "core.productimage", "pk": 106, "fields": { "product": 106, "image": "products/kids_106.jpg", "alt_text": "LOL Character Slippers", "order": 0 } },
+  { "model": "core.productimage", "pk": 107, "fields": { "product": 107, "image": "products/kids_107.jpg", "alt_text": "Ebay Boys White Trainers", "order": 0 } },
+  { "model": "core.productimage", "pk": 108, "fields": { "product": 108, "image": "products/kids_108.jpg", "alt_text": "Spider-Man Red Trainers", "order": 0 } },
+  { "model": "core.productimage", "pk": 109, "fields": { "product": 109, "image": "products/kids_109.jpg", "alt_text": "Disney Kids Light-up Sandals", "order": 0 } },
+  { "model": "core.productimage", "pk": 110, "fields": { "product": 110, "image": "products/kids_110.jpg", "alt_text": "Disney Princess Sandals", "order": 0 } },
+  { "model": "core.productimage", "pk": 111, "fields": { "product": 111, "image": "products/kids_111.jpg", "alt_text": "Shoezone Black Wellington Boots", "order": 0 } },
+  { "model": "core.productimage", "pk": 112, "fields": { "product": 112, "image": "products/kids_112.jpg", "alt_text": "Shoezone Purple Glitter Boots", "order": 0 } }
+]

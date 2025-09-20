@@ -27,27 +27,39 @@ from .models import Order
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .models import OrderTrackingEvent
 from .serializers import OrderTrackingEventSerializer
+from rest_framework.permissions import AllowAny
+
 
 logger = logging.getLogger(__name__)
 
+# in your views.py (update these two classes)
+
+from rest_framework.exceptions import PermissionDenied
+from django.shortcuts import get_object_or_404
+
+from rest_framework.permissions import AllowAny
 
 class OrderTrackingAPIView(RetrieveAPIView):
-    """
-    GET /api/orders/<pk>/tracking/  -> returns list of tracking events for order pk
-    """
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    # permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [AllowAny]  
     serializer_class = OrderTrackingEventSerializer
     lookup_url_kwarg = "pk"
 
     def get(self, request, pk, *args, **kwargs):
         order = get_object_or_404(Order, pk=pk)
-        # check ownership or staff
+        # ownership check with email fallback
+        user = request.user
+        email_param = (request.query_params.get("email") or "").strip().lower()
+
         if order.user_id:
-            if request.user.is_authenticated:
-                if not (request.user.is_staff or order.user_id == request.user.id):
+            if user.is_authenticated:
+                if not (user.is_staff or order.user_id == user.id):
                     raise PermissionDenied("You do not have permission to view this order's tracking.")
             else:
-                raise PermissionDenied("Authentication required to view this order's tracking.")
+                # allow anonymous if they supply matching order email
+                if not email_param or email_param != (order.email or "").strip().lower():
+                    raise PermissionDenied("Provide the order email to view tracking or sign in.")
+        # else if order.user is None, allow (public order) or proceed
         events = order.tracking_events.all()
         ser = self.get_serializer(events, many=True)
         return Response(ser.data)
@@ -55,38 +67,23 @@ class OrderTrackingAPIView(RetrieveAPIView):
 
 class OrderDetailAPIView(RetrieveAPIView):
     """
-    GET /api/orders/<pk>/  -> Return order detail with items.
-    Permission: allow logged-in users or read-only (but checks ownership below).
+    Public order detail endpoint.
+    WARNING: This will expose full order details (items, shipping address, email) to anyone
+    who knows the order id. Use with care.
     """
     queryset = Order.objects.all().prefetch_related("items__product")
     serializer_class = OrderDetailSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-
-    def get_object(self):
-        obj = super().get_object()
-        # If the request user is authenticated and not staff, ensure they see only their own order.
-        user = self.request.user
-        if user.is_authenticated:
-            # allow staff to view any order
-            if user.is_staff or obj.user_id == user.id:
-                return obj
-            # otherwise, if the order is not owned by the user, deny
-            raise PermissionDenied("You do not have permission to view this order.")
-        # for anonymous users, we allow viewing only if the order is not tied to a user (rare),
-        # otherwise deny to avoid exposing orders publicly.
-        if obj.user is None:
-            return obj
-        raise PermissionDenied("Authentication required to view this order.")
-
+    permission_classes = [AllowAny]
 
 class UserCheckoutDetailCreateAPIView(generics.CreateAPIView):
     queryset = UserCheckoutDetail.objects.all()
     serializer_class = UserCheckoutDetailSerializer
-    permission_classes = [permissions.IsAuthenticated]  
+    permission_classes = [AllowAny]
 
     def perform_create(self, serializer):
-        # attach current user
-        serializer.save(user=self.request.user)
+        user = self.request.user if self.request.user.is_authenticated else None
+        serializer.save(user=user)
+
 
 
 

@@ -1,5 +1,5 @@
 # core/serializers_auth.py
-from django.contrib.auth import get_user_model, password_validation
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 
@@ -35,12 +35,30 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
+    username = serializers.CharField()  # this field accepts username OR email
     password = serializers.CharField(write_only=True)
-    # validate and attach user
+
     def validate(self, data):
         from django.contrib.auth import authenticate
-        user = authenticate(username=data.get("username"), password=data.get("password"))
+        identifier = data.get("username")
+        password = data.get("password")
+
+        # If identifier looks like an email, try to resolve it to a username first
+        user = None
+        if identifier and "@" in identifier:
+            try:
+                # Prefer a case-insensitive match for email
+                user_obj = User.objects.filter(email__iexact=identifier).first()
+                if user_obj:
+                    # authenticate expects username (or whatever your backend uses)
+                    user = authenticate(username=user_obj.username, password=password)
+            except Exception:
+                user = None
+
+        # Fallback: try authenticate treating identifier as username
+        if user is None:
+            user = authenticate(username=identifier, password=password)
+
         if not user:
             raise serializers.ValidationError("Invalid credentials.")
         if not user.is_active:
