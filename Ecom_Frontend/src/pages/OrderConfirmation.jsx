@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 
-const API_ROOT = (import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api").replace(/\/+$/, "");
+const API_ROOT = (import.meta.env.VITE_API_URL || "https://django-4hm5.onrender.com/api").replace(/\/+$/, "");
 
 // Best-effort CSRF setter (call once before protected requests)
 async function ensureCsrf() {
@@ -279,3 +279,4 @@ export default function OrderConfirmation() {
     </div>
   );
 }
+
