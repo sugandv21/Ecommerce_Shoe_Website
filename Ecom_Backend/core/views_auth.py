@@ -17,9 +17,17 @@ signer = TimestampSigner()
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-@ensure_csrf_cookie
-def csrf(request):
-    return Response({"detail": "csrf cookie set"})
+def me(request):
+    """
+    Return user info when authenticated; otherwise return null (200).
+    This prevents 401 responses for anonymous requests and keeps frontend console quiet.
+    """
+    user = request.user
+    if user and user.is_authenticated:
+        return Response({"id": user.id, "username": user.username, "email": user.email})
+    # return explicit null so frontend can treat this as "not logged in"
+    return Response(None)
+
 
 class RegisterAPIView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
@@ -79,3 +87,4 @@ def logout_view(request):
 def me(request):
     user = request.user
     return Response({"id": user.id, "username": user.username, "email": user.email})
+
