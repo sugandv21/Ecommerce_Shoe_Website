@@ -1,4 +1,3 @@
-// src/pages/AuthPage.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios, { API_ROOT } from "../api/axiosSetup";
@@ -403,3 +402,4 @@ export default function AuthPage() {
     </div>
   );
 }
+
