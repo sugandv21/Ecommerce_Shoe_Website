@@ -1,16 +1,9 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+// src/pages/AuthPage.jsx
+import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import axios, { API_ROOT } from "../api/axiosSetup";
 import googleLogo from "../assets/images/google.png";
 
-const API_ROOT = (import.meta.env.VITE_API_URL || "https://django-4hm5.onrender.com/api").replace(
-  /\/+$/,
-  ""
-);
-
-/**
- * Modal component
- */
 function Modal({ title, children, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -31,21 +24,20 @@ function Modal({ title, children, onClose }) {
   );
 }
 
-/**
- * Robust cookie reader
- */
-function getCookie(name) {
-  if (typeof document === "undefined") return null;
-  const cookieStr = document.cookie || "";
-  const cookies = cookieStr.split(";").map((c) => c.trim());
-  const pref = name + "=";
-  const found = cookies.find((c) => c.startsWith(pref));
-  return found ? decodeURIComponent(found.substring(pref.length)) : null;
+function readCsrfTokenFromCookie() {
+  try {
+    const name = "csrftoken=";
+    const cookie = (document.cookie || "")
+      .split(";")
+      .map((c) => c.trim())
+      .find((c) => c.startsWith(name));
+    if (!cookie) return null;
+    return decodeURIComponent(cookie.substring(name.length));
+  } catch (e) {
+    return null;
+  }
 }
 
-/**
- * Main auth page
- */
 export default function AuthPage() {
   const [tab, setTab] = useState("login");
   const [loading, setLoading] = useState(false);
@@ -55,7 +47,12 @@ export default function AuthPage() {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const next = location.state?.next || "/";
+
+  // read "next" from either location.state or query param
+  const qs = new URLSearchParams(location.search);
+  const nextQuery = qs.get("next") || qs.get("redirect_to") || null;
+  const nextState = location.state?.next ?? null;
+  const next = nextState || nextQuery || "/";
 
   const [loginForm, setLoginForm] = useState({
     username: "",
@@ -72,59 +69,24 @@ export default function AuthPage() {
     agree: false,
   });
 
-  // Configure axios defaults once
   useEffect(() => {
-    axios.defaults.baseURL = API_ROOT + "/";
-    axios.defaults.withCredentials = true;
-    // If a CSRF cookie already exists, set it as a default header for unsafe requests
-    const csrftoken = getCookie("csrftoken");
-    if (csrftoken) {
-      axios.defaults.headers.common["X-CSRFToken"] = csrftoken;
-    }
-
-    // Ensure CSRF token exists on mount (backend should set csrftoken cookie on GET)
-    ensureCsrf().catch(() => {
-      /* ignore errors here; calls that require csrf will attempt again */
-    });
-
-    // read query param for tab (register/login)
     const q = new URLSearchParams(location.search);
     const t = q.get("tab");
     if (t === "register" || t === "login") setTab(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [location.search]);
 
   async function ensureCsrf() {
+    // call endpoint to set CSRF cookie if backend requires it
     try {
-      // a simple GET that will set csrftoken cookie (Django default behavior)
       await axios.get("/auth/csrf/");
-      const csrftoken = getCookie("csrftoken");
-      if (csrftoken) {
-        axios.defaults.headers.common["X-CSRFToken"] = csrftoken;
-      }
-      return csrftoken;
     } catch (e) {
-      // swallow: caller will handle actual failures
-      return null;
+      // ignore - some backends may not expose this endpoint
     }
   }
 
   function resetMessages() {
     setError("");
     setModalMessage("");
-  }
-
-  function parseServerError(err) {
-    const server = err?.response?.data ?? err?.message ?? "Request failed.";
-    if (typeof server === "object" && server !== null) {
-      const msgs = [];
-      for (const key of Object.keys(server)) {
-        const val = server[key];
-        msgs.push(`${key}: ${Array.isArray(val) ? val.join(", ") : val}`);
-      }
-      return msgs.join(" / ");
-    }
-    return String(server);
   }
 
   async function handleRegister(e) {
@@ -142,15 +104,20 @@ export default function AuthPage() {
     setLoading(true);
     try {
       await ensureCsrf();
+      const csrfToken = readCsrfTokenFromCookie();
+      const headers = csrfToken ? { "X-CSRFToken": csrfToken } : {};
+
       const payload = {
         username: regForm.username.trim(),
         email: regForm.email.trim(),
         password: regForm.password,
         confirm_password: regForm.confirm_password,
       };
-      await axios.post("/auth/register/", payload);
+
+      await axios.post("/auth/register/", payload, { headers });
+
       setModalMessage(
-        "You’ve successfully created an account. A confirmation email will be sent shortly with a verification link."
+        "Account created successfully. A confirmation email has been sent with a verification link."
       );
       setModalOpen(true);
       setRegForm({
@@ -164,7 +131,17 @@ export default function AuthPage() {
       setTab("login");
     } catch (err) {
       console.error("Register error:", err);
-      setError(parseServerError(err));
+      const server = err?.response?.data ?? err?.message ?? "Registration failed.";
+      if (typeof server === "object" && server !== null) {
+        const msgs = [];
+        for (const key of Object.keys(server)) {
+          const val = server[key];
+          msgs.push(`${key}: ${Array.isArray(val) ? val.join(", ") : val}`);
+        }
+        setError(msgs.join(" / "));
+      } else {
+        setError(String(server));
+      }
     } finally {
       setLoading(false);
     }
@@ -180,33 +157,52 @@ export default function AuthPage() {
     setLoading(true);
     try {
       await ensureCsrf();
-      // make sure header is present
-      const csrfToken = getCookie("csrftoken");
-      if (csrfToken) {
-        axios.defaults.headers.common["X-CSRFToken"] = csrfToken;
-      }
+      const csrfToken = readCsrfTokenFromCookie();
+      const headers = csrfToken ? { "X-CSRFToken": csrfToken, "Content-Type": "application/json" } : { "Content-Type": "application/json" };
 
       const payload = {
         username: loginForm.username.trim(),
         password: loginForm.password,
       };
-      const res = await axios.post("/auth/login/", payload, { withCredentials: true });
+
+      // use relative path - axios baseURL is set in axiosSetup
+      const res = await axios.post("/auth/login/", payload, {
+        headers,
+        withCredentials: true,
+      });
 
       const userId = res?.data?.id ?? null;
       const username = res?.data?.username ?? loginForm.username.trim();
       const email = res?.data?.email ?? null;
 
-      // inform other parts of the app
+      // signal auth change across app
       window.dispatchEvent(
         new CustomEvent("authUpdated", {
           detail: { id: userId, username, email },
         })
       );
 
+      // navigate to next (if any) or home
       navigate(next || "/");
     } catch (err) {
       console.error("Login error:", err);
-      setError(parseServerError(err));
+      // treat 401 as a normal "invalid credentials" case
+      const status = err?.response?.status;
+      if (status === 401) {
+        setError("Invalid credentials. Please check your email/username and password.");
+      } else {
+        const server = err?.response?.data ?? err?.message ?? "Login failed.";
+        if (typeof server === "object" && server !== null) {
+          const msgs = [];
+          for (const key of Object.keys(server)) {
+            const val = server[key];
+            msgs.push(`${key}: ${Array.isArray(val) ? val.join(", ") : val}`);
+          }
+          setError(msgs.join(" / "));
+        } else {
+          setError(String(server));
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -246,7 +242,7 @@ export default function AuthPage() {
         {tab === "login" ? (
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label className="block text-md font-bold mb-1">Email id</label>
+              <label className="block text-md font-bold mb-1">Email or username</label>
               <input
                 value={loginForm.username}
                 onChange={(e) => setLoginForm((s) => ({ ...s, username: e.target.value }))}
@@ -269,9 +265,7 @@ export default function AuthPage() {
                 />
                 <button
                   type="button"
-                  onClick={() =>
-                    setLoginForm((s) => ({ ...s, showPassword: !s.showPassword }))
-                  }
+                  onClick={() => setLoginForm((s) => ({ ...s, showPassword: !s.showPassword }))}
                   className="absolute right-3 top-3 text-sm text-gray-600"
                 >
                   {loginForm.showPassword ? "Hide" : "Show"}
@@ -280,9 +274,7 @@ export default function AuthPage() {
             </div>
 
             <div className="flex justify-end mt-2">
-              <a href="#" className="text-sm text-red-500 hover:underline">
-                Forgot Password?
-              </a>
+              <a href="#" className="text-sm text-red-500 hover:underline">Forgot Password?</a>
             </div>
 
             <button
@@ -295,14 +287,14 @@ export default function AuthPage() {
 
             <div className="text-center text-sm text-gray-500">Or</div>
 
+            {/* TODO: wire this to your OAuth endpoint */}
             <button
               type="button"
-              onClick={(ev) => {
-                ev.preventDefault();
-                // Optional: navigate to your backend OAuth endpoint if configured
-                // window.location.href = `${API_ROOT}/auth/google/`;
-              }}
               className="w-full border px-4 py-3 rounded-lg hover:bg-gray-100 flex items-center justify-center gap-3"
+              onClick={() => {
+                // Example: window.location.href = `${API_ROOT}/auth/google/redirect/`;
+                console.info("Google OAuth placeholder — wire to your backend OAuth redirect.");
+              }}
             >
               <span>Continue with Google</span>
               <img src={googleLogo} alt="Google" className="w-5 h-5" />
@@ -355,9 +347,7 @@ export default function AuthPage() {
                 />
                 <button
                   type="button"
-                  onClick={() =>
-                    setRegForm((s) => ({ ...s, showPassword: !s.showPassword }))
-                  }
+                  onClick={() => setRegForm((s) => ({ ...s, showPassword: !s.showPassword }))}
                   className="absolute right-3 top-3 text-sm text-gray-600"
                 >
                   {regForm.showPassword ? "Hide" : "Show"}
@@ -370,9 +360,7 @@ export default function AuthPage() {
               <input
                 type="password"
                 value={regForm.confirm_password}
-                onChange={(e) =>
-                  setRegForm((s) => ({ ...s, confirm_password: e.target.value }))
-                }
+                onChange={(e) => setRegForm((s) => ({ ...s, confirm_password: e.target.value }))}
                 className="w-full border px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="Confirm password"
                 required
@@ -386,9 +374,7 @@ export default function AuthPage() {
                 checked={regForm.agree}
                 onChange={(e) => setRegForm((s) => ({ ...s, agree: e.target.checked }))}
               />
-              <span>
-                I have read and agreed to the Terms and Conditions and Privacy Policy
-              </span>
+              <span>I have read and agreed to the Terms and Conditions and Privacy Policy</span>
             </div>
 
             <button
@@ -417,4 +403,3 @@ export default function AuthPage() {
     </div>
   );
 }
-
