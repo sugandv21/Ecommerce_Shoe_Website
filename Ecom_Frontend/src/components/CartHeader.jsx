@@ -1,4 +1,3 @@
-// src/components/CartHeader.jsx
 import React, { useEffect, useState } from "react";
 
 export default function CartHeader({
